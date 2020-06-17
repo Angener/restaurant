@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +67,7 @@ public class UserDao implements Dao<UserDto, UserTable> {
     }
 
     private String getUpdatableField(UserTable uf, UserDto user) {
-        Map<UserTable, String> newValues = new HashMap<>();
+        Map<UserTable, String> newValues = new EnumMap<>(UserTable.class);
         newValues.put(UserTable.USERNAME, user.getUsername());
         newValues.put(UserTable.EMAIL, user.getEmail());
         newValues.put(UserTable.PASSWORD, user.getPassword());
@@ -95,7 +96,7 @@ public class UserDao implements Dao<UserDto, UserTable> {
 
     @Override
     public UserDto get(UserDto user) throws DaoException {
-        Map<UserTable, String> param = new HashMap<>();
+        Map<UserTable, String> param = new EnumMap<>(UserTable.class);
         String username = user.getUsername();
         try {
             getFields(username, param);

@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MenuDao implements Dao<MenuDto, MenuTable> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MenuDao.class);
@@ -67,7 +64,7 @@ public class MenuDao implements Dao<MenuDto, MenuTable> {
     }
 
     private String getUpdatableField(MenuTable mf, MenuDto dish) {
-        Map<MenuTable, String> newValues = new HashMap<>();
+        Map<MenuTable, String> newValues = new EnumMap<>(MenuTable.class);
         newValues.put(MenuTable.DISH_NAME, dish.getName());
         newValues.put(MenuTable.CATEGORY, dish.getCategory());
         newValues.put(MenuTable.DESCRIPTION, dish.getDescription());
@@ -163,7 +160,7 @@ public class MenuDao implements Dao<MenuDto, MenuTable> {
     }
 
     private Map<MenuTable, String> scanDishesFields(ResultSet rs) throws SQLException {
-        Map<MenuTable, String> param = new HashMap<>();
+        Map<MenuTable, String> param = new EnumMap<>(MenuTable.class);
         ResultSetMetaData metaData = rs.getMetaData();
         putFieldsToMap(param, metaData, rs);
         return param;

@@ -179,7 +179,7 @@ public class OrderDao implements Dao<OrderDto, OrderTable> {
     }
 
     private Boolean getUpdatableField(OrderTable field, OrderDto order) {
-        Map<OrderTable, Boolean> updatableFields = new HashMap<>();
+        Map<OrderTable, Boolean> updatableFields = new EnumMap<>(OrderTable.class);
         updatableFields.put(OrderTable.IS_APPROVED, order.isApproved());
         updatableFields.put(OrderTable.IS_PASSED, order.isPassed());
         updatableFields.put(OrderTable.IS_COOKED, order.isCooked());
@@ -242,7 +242,7 @@ public class OrderDao implements Dao<OrderDto, OrderTable> {
     }
 
     private void collectOrderFields(PreparedStatement ps, OrderDto order) throws SQLException {
-        Map<OrderTable, String> param = new HashMap<>();
+        Map<OrderTable, String> param = new EnumMap<>(OrderTable.class);
         ps.setInt(1, order.getOrderId());
         ps.executeQuery();
         ResultSet rs = ps.getResultSet();
@@ -290,8 +290,8 @@ public class OrderDao implements Dao<OrderDto, OrderTable> {
     }
 
     private void addDishToOrder(ResultSet rs, List<MenuDto> dishes) throws SQLException {
-        Map<OrderMenuTable, String> orderParam = new HashMap<>();
-        Map<MenuTable, String> menuParam = new HashMap<>();
+        Map<OrderMenuTable, String> orderParam = new EnumMap<>(OrderMenuTable.class);
+        Map<MenuTable, String> menuParam = new EnumMap<>(MenuTable.class);
         ResultSetMetaData metaData = rs.getMetaData();
         collectFieldsFromOrderMenuTable(metaData, rs, orderParam);
         collectFieldsFromMenuTable(metaData, rs, menuParam);

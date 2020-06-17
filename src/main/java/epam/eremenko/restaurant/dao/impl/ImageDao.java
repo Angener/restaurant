@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ImageDao implements Dao<ImageDto, ImageTable> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageDao.class);
@@ -68,7 +65,7 @@ public class ImageDao implements Dao<ImageDto, ImageTable> {
     }
 
     private String getUpdatableFields(ImageTable field, ImageDto image) {
-        Map<ImageTable, String> newValues = new HashMap<>();
+        Map<ImageTable, String> newValues = new EnumMap<>(ImageTable.class);
         newValues.put(ImageTable.IMAGE_NAME, image.getImageName());
         newValues.put(ImageTable.IMAGE_PATH, image.getImagePath());
         newValues.put(ImageTable.DISH_ID, String.valueOf(image.getDishId()));
