@@ -5,7 +5,6 @@ import java.util.List;
 public class MenuDto extends Dto {
     private List<MenuDto> menu;
     private List<String> images;
-    private int id;
     private String name;
     private String category;
     private String description;
@@ -31,14 +30,6 @@ public class MenuDto extends Dto {
 
     public void setImages(List<String> images) {
         this.images = images;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -94,7 +85,7 @@ public class MenuDto extends Dto {
         return "MenuDto{" +
                 "menu=" + menu +
                 ", images=" + images +
-                ", id=" + id +
+                ", id=" + getId() +
                 ", name='" + name + '\'' +
                 ", category='" + category + '\'' +
                 ", description='" + description + '\'' +

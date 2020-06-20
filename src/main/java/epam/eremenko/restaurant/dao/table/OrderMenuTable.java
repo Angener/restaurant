@@ -7,7 +7,7 @@ public enum OrderMenuTable {
     QUANTITY("quantity"),
     AMOUNT("amount");
 
-    private String value;
+    private final String value;
 
     OrderMenuTable(String value) {
         this.value = value;

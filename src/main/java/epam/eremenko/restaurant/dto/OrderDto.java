@@ -5,7 +5,6 @@ import java.util.List;
 
 public class OrderDto extends Dto{
     private List<MenuDto> dishes;
-    private int orderId;
     private Timestamp orderDate;
     private double totalAmount;
     private int userId;
@@ -23,14 +22,6 @@ public class OrderDto extends Dto{
 
     public void setDishes(List<MenuDto> dishes) {
         this.dishes = dishes;
-    }
-
-    public int getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(int orderId) {
-        this.orderId = orderId;
     }
 
     public Timestamp getOrderDate() {
@@ -101,7 +92,7 @@ public class OrderDto extends Dto{
     public String toString() {
         return "OrderDto{" +
                 "dishes=" + dishes +
-                ", orderId=" + orderId +
+                ", orderId=" + getId() +
                 ", ordered=" + orderDate +
                 ", totalAmount=" + totalAmount +
                 ", userId=" + userId +

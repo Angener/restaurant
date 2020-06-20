@@ -1,114 +1,56 @@
 package epam.eremenko.restaurant.dao.impl;
 
-import epam.eremenko.restaurant.dao.Dao;
 import epam.eremenko.restaurant.dao.table.ImageTable;
 import epam.eremenko.restaurant.dao.table.MenuTable;
-import epam.eremenko.restaurant.dao.connection.ConnectionPool;
-import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dto.DtoFactory;
 import epam.eremenko.restaurant.dto.ImageDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class ImageDao implements Dao<ImageDto, ImageTable> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageDao.class);
+public class ImageDao extends DaoImpl<ImageDto, ImageTable> {
 
     @Override
-    public synchronized void add(ImageDto images) throws DaoException {
-        try {
-            addImagesToDirectory(images);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
+    public synchronized void doAdd(ImageDto images) throws SQLException {
+        addImagesToDirectory(images);
     }
 
     private void addImagesToDirectory(ImageDto images)
             throws SQLException {
-        ConnectionPool.connect(getAddQuery(),
+        connectionsPool.connect(getSqlQueryAddingImagesToDirectory(),
                 preparedStatement -> executeAddQuery(preparedStatement, images));
     }
 
-    private String getAddQuery() {
+    private String getSqlQueryAddingImagesToDirectory() {
         String fields = String.join(", ", ImageTable.IMAGE_NAME.get(),
                 ImageTable.IMAGE_PATH.get(), ImageTable.DISH_ID.get());
-        return "INSERT INTO " + ImageTable.TABLE_NAME.get() +
-                " (" + fields + ") VALUES (?,?,?)";
+        return "INSERT INTO " + ImageTable.TABLE_NAME.get() + " (" + fields + ") VALUES (?,?,?)";
     }
 
     private void executeAddQuery(PreparedStatement ps, ImageDto image) throws SQLException {
-        ps.setString(1, image.getImageName());
-        ps.setString(2, image.getImagePath());
+        ps.setString(1, image.getName());
+        ps.setString(2, image.getPath());
         ps.setInt(3, image.getDishId());
-        LOGGER.debug(ps.executeUpdate() + " image added. Image name: " + image.getImageName());
-    }
-
-    private void handleException(Exception ex) throws DaoException {
-        LOGGER.warn(ex.toString());
-        throw new DaoException(ex);
-    }
-
-
-    @Override
-    public void update(ImageTable field, ImageDto image) throws DaoException {
-        String value = getUpdatableFields(field, image);
-        int imageId = image.getImageId();
-        try {
-            updateField(field, value, imageId);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
-    }
-
-    private String getUpdatableFields(ImageTable field, ImageDto image) {
-        Map<ImageTable, String> newValues = new EnumMap<>(ImageTable.class);
-        newValues.put(ImageTable.IMAGE_NAME, image.getImageName());
-        newValues.put(ImageTable.IMAGE_PATH, image.getImagePath());
-        newValues.put(ImageTable.DISH_ID, String.valueOf(image.getDishId()));
-        return newValues.get(field);
-    }
-
-    private void updateField(ImageTable field, String value,
-                             int dishId) throws SQLException {
-        ConnectionPool.connect(getUpdateQuery(field),
-                preparedStatement -> executeUpdateQuery(preparedStatement, value, dishId));
-    }
-
-    private String getUpdateQuery(ImageTable field) {
-        return "UPDATE " + ImageTable.TABLE_NAME.get() + " SET " + field + " = ? WHERE " +
-                ImageTable.IMAGE_ID + " = ?";
-    }
-
-    private void executeUpdateQuery(PreparedStatement ps,
-                                    String value, int dishId) throws SQLException {
-        ps.setString(1, value);
-        ps.setInt(2, dishId);
-        LOGGER.debug(ps.executeUpdate() + " image updated. Image id: " + dishId);
+        getLogger().debug(ps.executeUpdate() + " image added. Image name: " + image.getName());
     }
 
     @Override
-    public ImageDto get(ImageDto image) throws DaoException {
+    public ImageDto doGet(ImageDto image) throws SQLException {
         List<String> imagePaths = new ArrayList<>();
         int dishId = image.getDishId();
-        try {
-            getImages(dishId, imagePaths);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
+        getImages(dishId, imagePaths);
         return DtoFactory.getImageDto(imagePaths);
     }
 
     private void getImages(int dishId,
                            List<String> imagePaths) throws SQLException {
-        ConnectionPool.connect(getGetQuery(),
+        connectionsPool.connect(getSqlQueryGettingImages(),
                 preparedStatement -> executeGetQuery(preparedStatement, imagePaths, dishId));
     }
 
-    private String getGetQuery() {
+    private String getSqlQueryGettingImages() {
         return "SELECT " + ImageTable.IMAGE_PATH + " FROM " + MenuTable.TABLE_NAME.get() +
                 " `m` JOIN " + ImageTable.TABLE_NAME.get() + " `i` ON m." +
                 MenuTable.DISH_ID + " = ?" + " WHERE m." + MenuTable.DISH_ID +
@@ -126,28 +68,35 @@ public class ImageDao implements Dao<ImageDto, ImageTable> {
     }
 
     @Override
-    public void delete(ImageDto image) throws DaoException {
-        int imageId = image.getImageId();
-        try {
-            deleteDish(imageId);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
+    void doUpdate(ImageTable field, ImageDto image) throws SQLException {
+        String value = getUpdatableFields(field, image);
+        int imageId = image.getId();
+        executeUpdateQuery(field, value, imageId);
     }
 
-    private void deleteDish(int imageId) throws SQLException {
-        ConnectionPool.connect(getDeleteQuery(),
-                preparedStatement -> executeDeleteQuery(preparedStatement, imageId));
+    private String getUpdatableFields(ImageTable field, ImageDto image) {
+        Map<ImageTable, String> newValues = new EnumMap<>(ImageTable.class);
+        newValues.put(ImageTable.IMAGE_NAME, image.getName());
+        newValues.put(ImageTable.IMAGE_PATH, image.getPath());
+        newValues.put(ImageTable.DISH_ID, String.valueOf(image.getDishId()));
+        return newValues.get(field);
     }
 
-    private String getDeleteQuery() {
-        return "DELETE FROM " + ImageTable.TABLE_NAME.get() + " WHERE " +
+    private void executeUpdateQuery(ImageTable field, String value,
+                                    int dishId) throws SQLException {
+        connectionsPool.connect(getSqlQueryUpdatingField(field),
+                preparedStatement -> prepareUpdateQuery(preparedStatement, value, dishId));
+    }
+
+    private String getSqlQueryUpdatingField(ImageTable field) {
+        return "UPDATE " + ImageTable.TABLE_NAME.get() + " SET " + field + " = ? WHERE " +
                 ImageTable.IMAGE_ID + " = ?";
     }
 
-    private void executeDeleteQuery(PreparedStatement ps,
-                                    int imageId) throws SQLException {
-        ps.setInt(1, imageId);
-        LOGGER.debug(ps.executeUpdate() + " image deleted. Image id:" + imageId);
+    private void prepareUpdateQuery(PreparedStatement ps,
+                                    String value, int dishId) throws SQLException {
+        ps.setString(1, value);
+        ps.setInt(2, dishId);
+        getLogger().debug(ps.executeUpdate() + " image updated. Image id: " + dishId);
     }
 }

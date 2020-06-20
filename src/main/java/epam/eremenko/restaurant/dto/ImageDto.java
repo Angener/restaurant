@@ -4,9 +4,8 @@ import java.util.List;
 
 public class ImageDto extends Dto {
     private List<String> images;
-    private int imageId;
-    private String imageName;
-    private String imagePath;
+    private String name;
+    private String path;
     private int dishId;
 
     public List<String> getImages() {
@@ -17,28 +16,20 @@ public class ImageDto extends Dto {
         this.images = images;
     }
 
-    public int getImageId() {
-        return imageId;
+    public String getName() {
+        return name;
     }
 
-    public void setImageId(int imageId) {
-        this.imageId = imageId;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getImageName() {
-        return imageName;
+    public String getPath() {
+        return path;
     }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public int getDishId() {
@@ -53,9 +44,9 @@ public class ImageDto extends Dto {
     public String toString() {
         return "ImageDto{" +
                 "images=" + images +
-                ", imageId=" + imageId +
-                ", imageName='" + imageName + '\'' +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageId=" + getId() +
+                ", imageName='" + name + '\'' +
+                ", imagePath='" + path + '\'' +
                 ", dishId=" + dishId +
                 '}';
     }

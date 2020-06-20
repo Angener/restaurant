@@ -7,7 +7,7 @@ public enum ImageTable {
     IMAGE_PATH("image_path"),
     DISH_ID("dish_id");
 
-    private String value;
+    private final String value;
 
     ImageTable(String value) {
         this.value = value;

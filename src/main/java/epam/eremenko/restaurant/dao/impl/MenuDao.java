@@ -1,42 +1,31 @@
 package epam.eremenko.restaurant.dao.impl;
 
-import epam.eremenko.restaurant.dao.Dao;
 import epam.eremenko.restaurant.dao.table.ImageTable;
 import epam.eremenko.restaurant.config.MenuCategories;
-import epam.eremenko.restaurant.dao.connection.ConnectionPool;
-import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.DtoFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.*;
 
-public class MenuDao implements Dao<MenuDto, MenuTable> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MenuDao.class);
+public class MenuDao extends DaoImpl<MenuDto, MenuTable> {
 
     @Override
-    public synchronized void add(MenuDto dish) throws DaoException {
-        try {
-            addDishToMenu(dish);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
+    public synchronized void doAdd(MenuDto dish) throws SQLException {
+        addDishToMenu(dish);
     }
 
     private void addDishToMenu(MenuDto dish) throws SQLException {
-        ConnectionPool.connect(getAddQuery(), preparedStatement ->
+        connectionsPool.connect(getSqlQueryAddingDishToMenu(), preparedStatement ->
                 executeAddQuery(preparedStatement, dish));
     }
 
-    private String getAddQuery() {
+    private String getSqlQueryAddingDishToMenu() {
         String fields = String.join(", ", MenuTable.DISH_NAME.get(),
                 MenuTable.CATEGORY.get(), MenuTable.DESCRIPTION.get(),
                 MenuTable.PRICE.get());
-        return "INSERT INTO " + MenuTable.TABLE_NAME.get() +
-                " (" + fields + ") VALUES (?,?,?,?)";
+        return "INSERT INTO " + MenuTable.TABLE_NAME.get() + " (" + fields + ") VALUES (?,?,?,?)";
     }
 
     private void executeAddQuery(PreparedStatement ps, MenuDto dish) throws SQLException {
@@ -44,99 +33,49 @@ public class MenuDao implements Dao<MenuDto, MenuTable> {
         ps.setString(2, dish.getCategory());
         ps.setString(3, dish.getDescription());
         ps.setDouble(4, dish.getPrice());
-        LOGGER.info(ps.executeUpdate() + " dish has been added. Dish name:" + dish.getName());
-    }
-
-    private void handleException(Exception ex) throws DaoException {
-        LOGGER.warn(ex.toString());
-        throw new DaoException(ex);
+        getLogger().info(ps.executeUpdate() + " dish has been added. Dish name:" + dish.getName());
     }
 
     @Override
-    public synchronized void update(MenuTable mf, MenuDto dish) throws DaoException {
-        String value = getUpdatableField(mf, dish);
-        int dishId = dish.getId();
-        try {
-            updateField(mf, value, dishId);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
-    }
-
-    private String getUpdatableField(MenuTable mf, MenuDto dish) {
-        Map<MenuTable, String> newValues = new EnumMap<>(MenuTable.class);
-        newValues.put(MenuTable.DISH_NAME, dish.getName());
-        newValues.put(MenuTable.CATEGORY, dish.getCategory());
-        newValues.put(MenuTable.DESCRIPTION, dish.getDescription());
-        newValues.put(MenuTable.PRICE, String.valueOf(dish.getPrice()));
-        return newValues.get(mf);
-    }
-
-    private void updateField(MenuTable field, String value,
-                             int dishId) throws SQLException {
-        ConnectionPool.connect(getUpdateQuery(field),
-                preparedStatement -> executeUpdateQuery(preparedStatement, value, dishId));
-    }
-
-    private String getUpdateQuery(MenuTable field) {
-        return "UPDATE " + MenuTable.TABLE_NAME.get() + " SET " + field + " = ? WHERE " +
-                MenuTable.DISH_ID + " = ?";
-    }
-
-    private void executeUpdateQuery(PreparedStatement ps,
-                                    String value, int dishId) throws SQLException {
-        ps.setString(1, value);
-        ps.setInt(2, dishId);
-        LOGGER.debug(ps.executeUpdate() + " dish has been updated. Dish id: " + dishId);
-    }
-
-    @Override
-    public MenuDto get(MenuDto menu) throws DaoException {
+    public MenuDto doGet(MenuDto menu) throws SQLException {
         List<MenuDto> dishes = new ArrayList<>();
         String category = menu.getCategory();
-        try {
-            getDishes(category, dishes);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
+        getDishes(category, dishes);
         return DtoFactory.getDishDto(dishes);
     }
 
     private void getDishes(String category, List<MenuDto> menu)
             throws SQLException {
-        ConnectionPool.connect(getGetQuery(category),
+        connectionsPool.connect(getSqlQueryByTypeAdminOrUser(category),
                 preparedStatement -> executeGetQuery(preparedStatement, menu));
     }
 
-    //TODO transfer all queries to storage procedures
-    //TODO create abstract class for methods
-    private String getGetQuery(String category) {
-        String fields = defineFields();
+    private String getSqlQueryByTypeAdminOrUser(String category) {
+        String fields = defineUpdatableField();
         if (category.equals(MenuCategories.WHOLE_MENU.get())) {
-            return madeQuery(fields);
+            return getSqlQueryGettingWholeMenu(fields);
         } else {
-            return madeParametrizedQuery(fields, category);
+            return getSqlQueryGettingDishesFromCategory(fields, category);
         }
     }
 
-    private String defineFields() {
+    private String defineUpdatableField() {
         return String.join(", ", MenuTable.DISH_ID.get(),
                 MenuTable.DISH_NAME.get(), MenuTable.CATEGORY.get(),
                 MenuTable.DESCRIPTION.get(), MenuTable.PRICE.get(),
                 ImageTable.IMAGE_PATH.get());
     }
 
-    private String madeQuery(String fields) {
+    private String getSqlQueryGettingWholeMenu(String fields) {
         return "SELECT " + fields + " FROM " + MenuTable.TABLE_NAME.get() +
                 "LEFT JOIN " + ImageTable.TABLE_NAME.get() + " USING (" +
                 MenuTable.DISH_ID + ")";
     }
 
-    private String madeParametrizedQuery(String fields, String category) {
+    private String getSqlQueryGettingDishesFromCategory(String fields, String category) {
         return "SELECT " + fields + " FROM " + MenuTable.TABLE_NAME.get() +
                 "LEFT JOIN " + MenuTable.TABLE_NAME.get() + " USING (" +
-                MenuTable.DISH_ID + ") WHERE " + MenuTable.CATEGORY +
-                " = '" + category + "'";
+                MenuTable.DISH_ID + ") WHERE " + MenuTable.CATEGORY + " = '" + category + "'";
     }
 
     private void executeGetQuery(PreparedStatement ps,
@@ -185,8 +124,7 @@ public class MenuDao implements Dao<MenuDto, MenuTable> {
         return images;
     }
 
-    private void collectImages(List<String> images, ResultSet rs,
-                               int dishId) throws SQLException {
+    private void collectImages(List<String> images, ResultSet rs, int dishId) throws SQLException {
         while (rs.next() && dishId == rs.getInt(MenuTable.DISH_ID.get())) {
             images.add(rs.getString(ImageTable.IMAGE_PATH.get()));
         }
@@ -194,28 +132,36 @@ public class MenuDao implements Dao<MenuDto, MenuTable> {
     }
 
     @Override
-    public synchronized void delete(MenuDto dish) throws DaoException {
+    public synchronized void doUpdate(MenuTable field, MenuDto dish) throws SQLException {
+        String value = getUpdatableField(field, dish);
         int dishId = dish.getId();
-        try {
-            deleteDish(dishId);
-        } catch (SQLException ex) {
-            handleException(ex);
-        }
+        updateField(field, value, dishId);
     }
 
-    private void deleteDish(int dishId) throws SQLException {
-        ConnectionPool.connect(getDeleteQuery(),
-                preparedStatement -> executeDeleteQuery(preparedStatement, dishId));
+    private String getUpdatableField(MenuTable mf, MenuDto dish) {
+        Map<MenuTable, String> newValues = new EnumMap<>(MenuTable.class);
+        newValues.put(MenuTable.DISH_NAME, dish.getName());
+        newValues.put(MenuTable.CATEGORY, dish.getCategory());
+        newValues.put(MenuTable.DESCRIPTION, dish.getDescription());
+        newValues.put(MenuTable.PRICE, String.valueOf(dish.getPrice()));
+        return newValues.get(mf);
     }
 
-    private String getDeleteQuery() {
-        return "DELETE FROM " + MenuTable.TABLE_NAME.get() + " WHERE " +
+    private void updateField(MenuTable field, String value,
+                             int dishId) throws SQLException {
+        connectionsPool.connect(getSqlQueryUpdatingField(field),
+                preparedStatement -> executeUpdateQuery(preparedStatement, value, dishId));
+    }
+
+    private String getSqlQueryUpdatingField(MenuTable field) {
+        return "UPDATE " + MenuTable.TABLE_NAME.get() + " SET " + field + " = ? WHERE " +
                 MenuTable.DISH_ID + " = ?";
     }
 
-    private void executeDeleteQuery(PreparedStatement ps,
-                                    int dishId) throws SQLException {
-        ps.setInt(1, dishId);
-        LOGGER.info(ps.executeUpdate() + " dish has been deleted. dishId: " + dishId);
+    private void executeUpdateQuery(PreparedStatement ps,
+                                    String value, int dishId) throws SQLException {
+        ps.setString(1, value);
+        ps.setInt(2, dishId);
+        getLogger().debug(ps.executeUpdate() + " dish has been updated. Dish id: " + dishId);
     }
 }

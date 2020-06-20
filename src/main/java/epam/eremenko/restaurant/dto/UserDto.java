@@ -5,7 +5,6 @@ import epam.eremenko.restaurant.config.UserRoles;
 import java.sql.Timestamp;
 
 public class UserDto extends Dto {
-    private int userId;
     private UserRoles role;
     private String username;
     private String email;
@@ -14,14 +13,6 @@ public class UserDto extends Dto {
     private Timestamp registrationDate;
 
     public UserDto() {
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public UserRoles getRole() {
@@ -75,7 +66,7 @@ public class UserDto extends Dto {
     @Override
     public String toString() {
         return "UserDto{" +
-                "userId=" + userId +
+                "userId=" + getId() +
                 ", role=" + role +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +

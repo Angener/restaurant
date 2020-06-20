@@ -44,7 +44,7 @@ public final class DtoFactory {
 
     public static UserDto getUserDto(Map<UserTable, String> param) {
         UserDto user = new UserDto();
-        user.setUserId(Integer.parseInt(param.get(UserTable.USER_ID)));
+        user.setId(Integer.parseInt(param.get(UserTable.USER_ID)));
         user.setRole(Enum.valueOf(UserRoles.class, param.get(UserTable.ROLE).toUpperCase()));
         user.setUsername(param.get(UserTable.USERNAME));
         user.setEmail(param.get(UserTable.EMAIL));
@@ -58,12 +58,6 @@ public final class DtoFactory {
         ImageDto images = new ImageDto();
         images.setImages(paths);
         return images;
-    }
-
-    public static OrderDto getOrderDto(int orderId) {
-        OrderDto order = new OrderDto();
-        order.setOrderId(orderId);
-        return order;
     }
 
     public static void configureOrderFields(OrderDto order, Map<OrderTable, String> param) {
