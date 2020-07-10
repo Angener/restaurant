@@ -1,7 +1,6 @@
 package epam.eremenko.restaurant.dao.impl;
 
 import epam.eremenko.restaurant.dao.Applier;
-import epam.eremenko.restaurant.dao.connection.impl.c3po.C3p0;
 import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dao.table.OrderMenuTable;
 import epam.eremenko.restaurant.dao.table.OrderTable;
@@ -9,10 +8,18 @@ import epam.eremenko.restaurant.dto.DtoFactory;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.OrderDto;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
-public class OrderDao extends DaoImpl<OrderDto, OrderTable> {
+class OrderDao extends DaoImpl<OrderDto, OrderTable> {
 
     @Override
     void doAdd(OrderDto order) throws SQLException {

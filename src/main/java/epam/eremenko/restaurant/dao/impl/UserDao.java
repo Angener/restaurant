@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class UserDao extends DaoImpl<UserDto, UserTable> {
+class UserDao extends DaoImpl<UserDto, UserTable> {
 
     @Override
     public void doAdd(UserDto user) throws SQLException {

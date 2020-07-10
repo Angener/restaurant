@@ -3,9 +3,9 @@ package epam.eremenko.restaurant.config;
 public enum MenuCategories {
 
     WHOLE_MENU("All"),
-    DELICACIES("Деликатесы"),
-    BELARUSIAN_GOLD("Золото Беларуси");
-
+    CAKES("Cakes"),
+    SWEETS("Sweets"),
+    COOKIES("Cookies");
 
     private final String category;
 

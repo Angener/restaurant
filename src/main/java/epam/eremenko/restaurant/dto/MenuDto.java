@@ -15,7 +15,6 @@ public class MenuDto extends Dto {
     public MenuDto() {
     }
 
-
     public List<MenuDto> getMenu() {
         return menu;
     }

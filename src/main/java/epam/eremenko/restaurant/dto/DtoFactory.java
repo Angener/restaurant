@@ -6,6 +6,7 @@ import epam.eremenko.restaurant.dao.table.OrderTable;
 import epam.eremenko.restaurant.dao.table.UserTable;
 import epam.eremenko.restaurant.config.UserRoles;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,35 @@ public final class DtoFactory {
         return user;
     }
 
+    public static UserDto getUserDto(String username, String password, String email, String mobile) {
+        UserDto userDto = new UserDto();
+        userDto.setUsername(username);
+        userDto.setPassword(password);
+        userDto.setEmail(email);
+        userDto.setMobile(mobile);
+        return userDto;
+    }
+
+    public static UserDto getUserDto(String username, String password) {
+        UserDto userDto = new UserDto();
+        userDto.setUsername(username);
+        userDto.setPassword(password);
+        return userDto;
+    }
+
+    public static UserDto getUserDto(HttpServletRequest request) {
+        UserDto userDto = new UserDto();
+        userDto.setUsername(request.getParameter("Username").trim());
+        userDto.setPassword(request.getParameter("Password").trim());
+        if (request.getParameter("Email") != null) {
+            userDto.setEmail(request.getParameter("Email").trim());
+        }
+        if (request.getParameter("Phone") != null) {
+            userDto.setMobile(request.getParameter("Phone").trim());
+        }
+        return userDto;
+    }
+
     public static ImageDto getImageDto(List<String> paths) {
         ImageDto images = new ImageDto();
         images.setImages(paths);
@@ -73,5 +103,27 @@ public final class DtoFactory {
 
     private static boolean castToBoolean(String value) {
         return value.equals("1");
+    }
+
+    public static MenuDto getMenuDto(String name, String category, String description) {
+        MenuDto menuDto = new MenuDto();
+        menuDto.setName(name);
+        menuDto.setCategory(category);
+        menuDto.setDescription(description);
+        return menuDto;
+    }
+
+    public static MenuDto getMenuDto(String category) {
+        MenuDto menuDto = new MenuDto();
+        menuDto.setCategory(category);
+        return menuDto;
+    }
+
+    public static MenuDto getMenuDto(HttpServletRequest request) {
+        MenuDto menuDto = new MenuDto();
+        menuDto.setName(request.getParameter("name").trim());
+        menuDto.setCategory(request.getParameter("category").trim());
+        menuDto.setDescription(request.getParameter("description").trim());
+        return menuDto;
     }
 }
