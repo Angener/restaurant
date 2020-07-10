@@ -1,22 +1,18 @@
-<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html/>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=cp1251"/>
+        <title>First JSP App</title>
+    </head>
+
+    <body>
+        <h2>
+            Servletische! Сервлетище!
+        </h2>
 
 
-<html>
-<head>
-
-</head>
-
-<body>
-<form action="Controller" method="post">
-<input type="hidden" name="local" value="ru" />
-<input type="submit" value=<fmt:message key="local.button.ru" bundle="${loc}"/>><br />
-</form>
-<form action="Controller" method="post">
-<input type="hidden" name="local" value="en" />
-<input type="submit" value=<fmt:message key="local.button.en" bundle="${loc}"/>><br/>
-
-</form>
-</body>
+        <a href="servlet">Click here to see servlet</a>
+    </body>
 </html>
+
