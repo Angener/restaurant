@@ -8,9 +8,12 @@ import epam.eremenko.restaurant.dto.ImageDto;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
-public class ImageDao extends DaoImpl<ImageDto, ImageTable> {
+class ImageDao extends DaoImpl<ImageDto, ImageTable> {
 
     @Override
     public synchronized void doAdd(ImageDto images) throws SQLException {

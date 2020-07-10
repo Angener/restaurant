@@ -1,18 +1,34 @@
-package epam.eremenko.restaurant.servlet;
+package epam.eremenko.restaurant.controller;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
+import epam.eremenko.restaurant.controller.command.CommandFactory;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import javax.servlet.http.HttpSession;
 
 public class Controller extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getSession(true).setAttribute("local", request.getParameter("local"));
-//        request.getRequestDispatcher("index.jsp").forward(request, response);
-        response.sendRedirect(request.getContextPath() + "/restaurant");
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        clearErrors(request);
+        CommandFactory.valueOf(request.getParameter("command")).get().execute(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        clearErrors(request);
+        CommandFactory.valueOf(request.getParameter("command")).get().execute(request, response);
+    }
+
+    private void clearErrors(HttpServletRequest request) {
+        if (isErrorExists(request.getSession())) {
+            request.getSession().removeAttribute("error");
+        }
+    }
+
+    private boolean isErrorExists(HttpSession session) {
+        return session.getAttribute("error") != null;
     }
 }

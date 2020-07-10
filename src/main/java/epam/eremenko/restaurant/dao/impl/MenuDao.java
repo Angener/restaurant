@@ -6,10 +6,16 @@ import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.DtoFactory;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
-public class MenuDao extends DaoImpl<MenuDto, MenuTable> {
+class MenuDao extends DaoImpl<MenuDto, MenuTable> {
 
     @Override
     public synchronized void doAdd(MenuDto dish) throws SQLException {
@@ -46,11 +52,11 @@ public class MenuDao extends DaoImpl<MenuDto, MenuTable> {
 
     private void getDishes(String category, List<MenuDto> menu)
             throws SQLException {
-        connectionsPool.connect(getSqlQueryByTypeAdminOrUser(category),
+        connectionsPool.connect(getSqlQueryByWholeOrPartMenu(category),
                 preparedStatement -> executeGetQuery(preparedStatement, menu));
     }
 
-    private String getSqlQueryByTypeAdminOrUser(String category) {
+    private String getSqlQueryByWholeOrPartMenu(String category) {
         String fields = defineUpdatableField();
         if (category.equals(MenuCategories.WHOLE_MENU.get())) {
             return getSqlQueryGettingWholeMenu(fields);
@@ -74,7 +80,7 @@ public class MenuDao extends DaoImpl<MenuDto, MenuTable> {
 
     private String getSqlQueryGettingDishesFromCategory(String fields, String category) {
         return "SELECT " + fields + " FROM " + MenuTable.TABLE_NAME.get() +
-                "LEFT JOIN " + MenuTable.TABLE_NAME.get() + " USING (" +
+                "LEFT JOIN " + ImageTable.TABLE_NAME.get() + " USING (" +
                 MenuTable.DISH_ID + ") WHERE " + MenuTable.CATEGORY + " = '" + category + "'";
     }
 
@@ -108,7 +114,7 @@ public class MenuDao extends DaoImpl<MenuDto, MenuTable> {
     private void putFieldsToMap(Map<MenuTable, String> param, ResultSetMetaData metaData,
                                 ResultSet rs) throws SQLException {
         int columnsQuantity = metaData.getColumnCount();
-        for (int i = 1; i <= columnsQuantity; i++) {
+        for (int i = 1; i < columnsQuantity; i++) {
             MenuTable key = Enum.valueOf(MenuTable.class,
                     metaData.getColumnName(i).toUpperCase());
             String value = rs.getString(i);

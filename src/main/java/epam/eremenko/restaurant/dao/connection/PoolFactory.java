@@ -5,8 +5,8 @@ import epam.eremenko.restaurant.dao.connection.impl.custom.CustomPool;
 
 public final class PoolFactory {
     private static PoolFactory instance;
-    private final C3p0 c3po = new C3p0();
-    private final CustomPool custom = new CustomPool();
+    private final ConnectionPool c3po = new C3p0();
+    private final ConnectionPool custom = new CustomPool();
 
     private PoolFactory() {
     }

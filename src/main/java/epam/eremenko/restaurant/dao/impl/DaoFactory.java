@@ -1,9 +1,6 @@
-package epam.eremenko.restaurant.dao;
+package epam.eremenko.restaurant.dao.impl;
 
-import epam.eremenko.restaurant.dao.impl.ImageDao;
-import epam.eremenko.restaurant.dao.impl.MenuDao;
-import epam.eremenko.restaurant.dao.impl.OrderDao;
-import epam.eremenko.restaurant.dao.impl.UserDao;
+import epam.eremenko.restaurant.dao.Dao;
 import epam.eremenko.restaurant.dao.table.ImageTable;
 import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dao.table.OrderTable;

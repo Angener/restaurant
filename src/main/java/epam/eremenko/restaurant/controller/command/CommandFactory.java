@@ -1,21 +1,23 @@
 package epam.eremenko.restaurant.controller.command;
 
-public enum CCMD {
+public enum CommandFactory {
 
-//    CHANGE_LOCALE(((request, response) -> {
-//        request.getSession(true).setAttribute("local", request.getParameter("local"));
-//        response.sendRedirect(request.getContextPath() + "/restaurant");
-//    }));
+    CHANGE_LOCALE(new CommandImpl().LOCALE_CHANGER),
+    SIGN_UP(new CommandImpl().REGISTER),
+    SIGN_IN(new CommandImpl().SIGN_IN_INSPECTOR),
+    SIGN_OUT(new CommandImpl().SIGN_OUTER),
+    GET_FORM(new CommandImpl().MENU_FORMATTER),
+    ADD_DISH(new CommandImpl().MENU_CREATOR),
+    GET_MENU(new CommandImpl().MENU_SUPPLIER);
 
-    CHANGE_LOCAL(new UserCommand().LOCAL_CHANGER);
 
     private final Command command;
 
-    CCMD(Command command){
-        this.command= command;
+    CommandFactory(Command command) {
+        this.command = command;
     }
 
-    public Command getCommand() {
+    public Command get() {
         return command;
     }
 }

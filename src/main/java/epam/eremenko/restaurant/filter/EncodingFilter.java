@@ -1,24 +1,42 @@
 package epam.eremenko.restaurant.filter;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
-public class CharsetFilter implements Filter {
+public class EncodingFilter implements Filter {
+    private static final String CONTENT_TYPE = "text/html; charset=UTF-8";
+    private static final String CHARACTER_ENCODING = "UTF-8";
+    private String encoding;
+
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
+    public void init(FilterConfig config) {
+        encoding = config.getInitParameter("requestEncoding");
+        if (encoding == null) encoding = "UTF-8";
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        
-        servletRequest.setCharacterEncoding("UTF-8");
-        servletResponse.setCharacterEncoding("UTF-8");
-        filterChain.doFilter(servletRequest, servletResponse);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain next)
+            throws IOException, ServletException {
+        setProperties(request, response);
+        next.doFilter(request, response);
     }
 
-    @Override
-    public void destroy() {
+    private void setProperties(ServletRequest request, ServletResponse response)
+            throws UnsupportedEncodingException {
+        if (isSetEncoding(request)) {
+            request.setCharacterEncoding(encoding);
+        }
+        response.setContentType(CONTENT_TYPE);
+        response.setCharacterEncoding(CHARACTER_ENCODING);
+    }
 
+    private boolean isSetEncoding(ServletRequest request){
+        return null == request.getCharacterEncoding();
     }
 }

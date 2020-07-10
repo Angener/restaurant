@@ -1,12 +1,13 @@
-package epam.eremenko.restaurant.service;
+package epam.eremenko.restaurant.service.impl;
 
 import epam.eremenko.restaurant.dao.Dao;
-import epam.eremenko.restaurant.dao.DaoFactory;
+import epam.eremenko.restaurant.dao.impl.DaoFactory;
 import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.entity.BeanFactory;
 import epam.eremenko.restaurant.entity.Menu;
+import epam.eremenko.restaurant.service.MenuService;
 import epam.eremenko.restaurant.service.exception.ServiceException;
 import epam.eremenko.restaurant.service.util.MenuValidator;
 import org.slf4j.Logger;
@@ -15,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MenuService {
+class MenuServiceImpl implements MenuService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MenuService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MenuServiceImpl.class);
     private static final Dao<MenuDto, MenuTable> MENU_DAO = DaoFactory.getInstance().getMenuDao();
 
     public void add(MenuDto menuDto, String price) throws ServiceException {
