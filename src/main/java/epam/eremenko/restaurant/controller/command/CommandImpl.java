@@ -108,7 +108,8 @@ class CommandImpl {
     }
 
     private void getAddMenuForm(HttpServletRequest request, HttpServletResponse response) {
-        forward(request, response, PageAddresses.MENU_REGISTER.get());
+//        forward(request, response, PageAddresses.MENU_REGISTER.get());
+        redirect(response, PageAddresses.MENU_REGISTER.get());
     }
 
     private void forward(HttpServletRequest request, HttpServletResponse response, String pagePath) {
