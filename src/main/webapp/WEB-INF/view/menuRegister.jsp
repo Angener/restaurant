@@ -61,7 +61,6 @@
           <p><input required type="text" name="price" placeholder=<fmt:message key="menuRegister.dishPrice" bundle="${loc}"/>></p>
           <input type="submit" value=<fmt:message key="menuRegister.button.add" bundle="${loc}"/>>
     	</div>
-        <c:out value="${error}"/>
   </div>
 </div>
 </body>

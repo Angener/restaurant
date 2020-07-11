@@ -48,7 +48,7 @@ public class MenuValidator {
     private void checkName(MenuDto menuDto) {
         String name = menuDto.getName();
         if (isNameNotEligible(name)) {
-            stringBuilder.append("Name is invalid");
+            stringBuilder.append("Name is invalid. ");
         }
     }
 
@@ -59,7 +59,7 @@ public class MenuValidator {
     private void checkDescription(MenuDto menuDto) {
         String description = menuDto.getDescription();
         if (isDescriptionNotEligible(description)) {
-            stringBuilder.append("Description is invalid");
+            stringBuilder.append("Description is invalid. ");
         }
     }
 

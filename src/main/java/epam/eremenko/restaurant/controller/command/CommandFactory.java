@@ -6,9 +6,11 @@ public enum CommandFactory {
     SIGN_UP(new CommandImpl().REGISTER),
     SIGN_IN(new CommandImpl().SIGN_IN_INSPECTOR),
     SIGN_OUT(new CommandImpl().SIGN_OUTER),
-    GET_FORM(new CommandImpl().MENU_FORMATTER),
+    GET_ADMIN_FORM(new CommandImpl().ADMIN_FORMS_GETTER),
     ADD_DISH(new CommandImpl().MENU_CREATOR),
-    GET_MENU(new CommandImpl().MENU_SUPPLIER);
+    GET_MENU(new CommandImpl().MENU_SUPPLIER),
+    ADD_TO_ORDER(new CommandImpl().ORDER_COLLECTOR),
+    GET_CUSTOMER_FORM(new CommandImpl().CUSTOMER_FORMS_GETTER);
 
 
     private final Command command;

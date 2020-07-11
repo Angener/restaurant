@@ -34,14 +34,6 @@
         <url-pattern>/authorization</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>MenuRegister</servlet-name>
-        <jsp-file>/WEB-INF/view/menuRegister.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>MenuRegister</servlet-name>
-        <url-pattern>/menuRegister</url-pattern>
-    </servlet-mapping>
-    <servlet>
         <servlet-name>Menu</servlet-name>
         <jsp-file>/WEB-INF/view/menu.jsp</jsp-file>
     </servlet>
@@ -61,14 +53,5 @@
     <filter-mapping>
         <filter-name>EncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    <filter>
-        <display-name>EntryFilter</display-name>
-        <filter-name>EntryFilter</filter-name>
-        <filter-class>epam.eremenko.restaurant.filter.EntryFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>EntryFilter</filter-name>
-        <url-pattern>/menuRegister</url-pattern>
     </filter-mapping>
 </web-app>

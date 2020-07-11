@@ -9,10 +9,8 @@ import epam.eremenko.restaurant.config.UserRoles;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public final class DtoFactory {
 
@@ -97,6 +95,12 @@ public final class DtoFactory {
         defineOrdersDtoFields(order, param);
     }
 
+    public static OrderDto getOrderDto(int userId){
+        OrderDto order = new OrderDto();
+        order.setUserId(userId);
+        return order;
+    }
+
     public static OrderDto getOrderDto(Map<OrderTable, String> param){
         OrderDto order = new OrderDto();
         order.setId(Integer.parseInt(param.get(OrderTable.USER_ID)));
@@ -140,6 +144,20 @@ public final class DtoFactory {
         menuDto.setCategory(request.getParameter("category").trim());
         menuDto.setDescription(request.getParameter("description").trim());
         return menuDto;
+    }
+
+    public static MenuDto getMenuDto(int dishId, int dishQuantity, double price, String name){
+        MenuDto dish = new MenuDto();
+        dish.setId(dishId);
+        dish.setQuantity(dishQuantity);
+        dish.setPrice(price);
+        dish.setName(name);
+        dish.setAmount(calculateAmount(dishQuantity, price));
+        return dish;
+    }
+
+    private static double calculateAmount(int dishQuantity, double price){
+        return dishQuantity * price;
     }
 
     public static ReportDto getReportDto(List<OrderDto> orders){
