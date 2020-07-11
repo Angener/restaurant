@@ -75,7 +75,7 @@
             </button>
      	</form>
      	<c:if test= "${role == 'admin'}">
-      	<form action="controller?command=GET_FORM" method="post" >
+      	<form action="controller?command=GET_ADMIN_FORM&form=MENU_REGISTER" method="post" >
       		<button type="submit">
             <fmt:message key="menu.add" bundle="${loc}"/>
             </button>
@@ -83,6 +83,7 @@
 	     </c:if>
     	</div>
 	<div class="col-2-3">
+		 <c:out value="${error}"/>
       
 
 
@@ -99,23 +100,39 @@
   						<c:out value="${dish.description}"/>
   						<c:choose>
     						<c:when test="${role == 'admin'}">
-    							<form action="controller?command=GET_MENU&category=All" method="post" >
+    							<form action="controller?command=GET_MENU&category=All" method="post">
       								<button type="submit">
            								<fmt:message key="menu.button.changeMenu" bundle="${loc}"/>
            							</button>
      							</form>
     						</c:when>
     						<c:when test="${role == 'customer'}">
-    							<form action="controller?command=GET_MENU&category=All" method="post" >
+    							<form action="controller?command=ADD_TO_ORDER" method="post">
+    								<input type="hidden" name="dishId" value="${dish.id}">
+    								<input type="hidden" name="dishName" value="${dish.name}">
+    								<input type="hidden" name="dishQuantity" value="1">
+    								<input type="hidden" name="dishPrice" value="${dish.price}">
       								<button type="submit">
-           								<fmt:message key="menu.button.addToCart" bundle="${loc}"/>
+           								<fmt:message key="menu.button.addToOrder" bundle="${loc}"/>
            							</button>
      							</form>
+
+
+     							<c:if test= "${orderDto != null}">
+      								<form action="controller?command=GET_CUSTOMER_FORM&form=ORDER_PROCESSOR" method="post" >
+      									<button type="submit">
+           									<fmt:message key="menu.button.processOrder" bundle="${loc}"/>
+           								</button>
+     								</form>
+	    						</c:if>
+
+
+
     						</c:when>
     						<c:otherwise>
      							<form action="/authorization" method="post" >
       								<button type="submit">
-           								<fmt:message key="menu.button.addToCart" bundle="${loc}"/>
+           								<fmt:message key="menu.button.addToOrder" bundle="${loc}"/>
            							</button>
      							</form>
     						</c:otherwise>
