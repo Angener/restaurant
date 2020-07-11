@@ -17,7 +17,6 @@ public final class DaoFactory {
     private final Dao<MenuDto, MenuTable> menuDao = new MenuDao();
     private final Dao<OrderDto, OrderTable> orderDao = new OrderDao();
     private final Dao<ImageDto, ImageTable> imageDao = new ImageDao();
-//    private final ReporterDao<ReportDto> reporter = new OrderReporter();
     private final Dao<ReportDto, OrderTable> reporter = new OrderReporter();
 
 
@@ -50,11 +49,7 @@ public final class DaoFactory {
     public Dao<ImageDto, ImageTable> getImageDao() {
         return imageDao;
     }
-
-//    public ReporterDao<ReportDto> getReporter() {
-//        return reporter;
-//    }
-
+    
     public Dao<ReportDto, OrderTable> getReporter() {
         return reporter;
     }
