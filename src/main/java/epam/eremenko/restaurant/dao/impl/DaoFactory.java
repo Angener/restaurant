@@ -8,6 +8,7 @@ import epam.eremenko.restaurant.dao.table.UserTable;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.ImageDto;
 import epam.eremenko.restaurant.dto.OrderDto;
+import epam.eremenko.restaurant.dto.ReportDto;
 import epam.eremenko.restaurant.dto.UserDto;
 
 public final class DaoFactory {
@@ -16,6 +17,7 @@ public final class DaoFactory {
     private final Dao<MenuDto, MenuTable> menuDao = new MenuDao();
     private final Dao<OrderDto, OrderTable> orderDao = new OrderDao();
     private final Dao<ImageDto, ImageTable> imageDao = new ImageDao();
+    private final Dao<ReportDto, OrderTable> reporter = new OrderReporter();
 
 
     private DaoFactory() {
@@ -46,5 +48,9 @@ public final class DaoFactory {
 
     public Dao<ImageDto, ImageTable> getImageDao() {
         return imageDao;
+    }
+    
+    public Dao<ReportDto, OrderTable> getReporter() {
+        return reporter;
     }
 }

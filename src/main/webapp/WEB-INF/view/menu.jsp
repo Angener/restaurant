@@ -105,8 +105,15 @@
            							</button>
      							</form>
     						</c:when>
+    						<c:when test="${role == 'customer'}">
+    							<form action="controller?command=GET_MENU&category=All" method="post" >
+      								<button type="submit">
+           								<fmt:message key="menu.button.addToCart" bundle="${loc}"/>
+           							</button>
+     							</form>
+    						</c:when>
     						<c:otherwise>
-     							<form action="controller?command=GET_MENU&category=All" method="post" >
+     							<form action="/authorization" method="post" >
       								<button type="submit">
            								<fmt:message key="menu.button.addToCart" bundle="${loc}"/>
            							</button>
