@@ -97,7 +97,7 @@ abstract class DaoImpl<T extends Dto, E extends Enum<E>> implements Dao<T, E> {
                 " has been deleted. Id: " + id);
     }
 
-    public void handleException(Exception ex) throws DaoException {
+    private void handleException(Exception ex) throws DaoException {
         LOGGER.debug(ex.toString());
         throw new DaoException(ex);
     }

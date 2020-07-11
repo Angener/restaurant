@@ -8,8 +8,11 @@ import epam.eremenko.restaurant.config.UserRoles;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class DtoFactory {
 
@@ -91,6 +94,18 @@ public final class DtoFactory {
     }
 
     public static void configureOrderFields(OrderDto order, Map<OrderTable, String> param) {
+        defineOrdersDtoFields(order, param);
+    }
+
+    public static OrderDto getOrderDto(Map<OrderTable, String> param){
+        OrderDto order = new OrderDto();
+        order.setId(Integer.parseInt(param.get(OrderTable.USER_ID)));
+        defineOrdersDtoFields(order, param);
+        return order;
+    }
+
+    private static void defineOrdersDtoFields(OrderDto order, Map<OrderTable, String> param){
+
         order.setTotalAmount(Double.parseDouble(param.get(OrderTable.TOTAL_AMOUNT)));
         order.setIsApproved(castToBoolean(param.get(OrderTable.IS_APPROVED)));
         order.setIsPassed(castToBoolean(param.get(OrderTable.IS_PASSED)));
@@ -125,5 +140,11 @@ public final class DtoFactory {
         menuDto.setCategory(request.getParameter("category").trim());
         menuDto.setDescription(request.getParameter("description").trim());
         return menuDto;
+    }
+
+    public static ReportDto getReportDto(List<OrderDto> orders){
+        ReportDto report = new ReportDto();
+        report.setOrders(new ArrayList<>(orders));
+        return report;
     }
 }
