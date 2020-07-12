@@ -1,0 +1,28 @@
+<taglib>
+    <tlib-version>1.0</tlib-version>
+    <jsp-version>2.0</jsp-version>
+    <short-name>processor</short-name>
+    <uri>/WEB-INF/tld/processor</uri>
+    <tag>
+        <name>process</name>
+        <tag-class>epam.eremenko.restaurant.tag.Processor</tag-class>
+        <body-content>empty</body-content>
+        <body-content>JSP</body-content>
+        <info>The tag processes order in the orderProcess form</info>
+        <attribute>
+            <name>key</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>order</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>dishId</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+</taglib>

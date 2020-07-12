@@ -10,7 +10,9 @@ public enum CommandFactory {
     ADD_DISH(new CommandImpl().MENU_CREATOR),
     GET_MENU(new CommandImpl().MENU_SUPPLIER),
     ADD_TO_ORDER(new CommandImpl().ORDER_COLLECTOR),
-    GET_CUSTOMER_FORM(new CommandImpl().CUSTOMER_FORMS_GETTER);
+    GET_CUSTOMER_FORM(new CommandImpl().CUSTOMER_FORMS_GETTER),
+    USE_TLD_TAG(new CommandImpl().USE_TLD_TAG),
+    CREATE_ORDER(new CommandImpl().ORDER_CREATOR);
 
 
     private final Command command;

@@ -36,6 +36,8 @@ class CommandImpl {
     final Command MENU_SUPPLIER = this::getMenu;
     final Command ORDER_COLLECTOR = this::collectOrder;
     final Command CUSTOMER_FORMS_GETTER = this::getCustomerForm;
+    final Command USE_TLD_TAG = this::useTldTag;
+    final Command ORDER_CREATOR = this::createOrder;
 
     private static final UserService USER_SERVICE = ServiceFactory.getInstance().getUserService();
     private static final MenuService MENU_SERVICE = ServiceFactory.getInstance().getMenuService();
@@ -125,17 +127,17 @@ class CommandImpl {
         return request.getSession().getAttribute("user") != null;
     }
 
-    private boolean isUserIsAdmin(HttpServletRequest request){
+    private boolean isUserIsAdmin(HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute("user");
         return user.getRole().equals(UserRoles.ADMIN);
     }
 
-    private void getForm(HttpServletRequest request, HttpServletResponse response){
+    private void getForm(HttpServletRequest request, HttpServletResponse response) {
         String form = PageAddresses.valueOf(request.getParameter("form")).get();
         forward(request, response, form);
     }
 
-    private void forwardToAuthorization(HttpServletRequest request, HttpServletResponse response){
+    private void forwardToAuthorization(HttpServletRequest request, HttpServletResponse response) {
         forward(request, response, PageAddresses.AUTHORIZATION.get());
     }
 
@@ -249,5 +251,45 @@ class CommandImpl {
     private boolean isUserIsCustomer(HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute("user");
         return user.getRole().equals(UserRoles.CUSTOMER);
+    }
+
+    private void useTldTag(HttpServletRequest request, HttpServletResponse response) {
+        String key = request.getParameter("key");
+        Integer dishId = getDishFromRequest(request);
+        request.setAttribute("key", key);
+        request.setAttribute("dishId", dishId);
+        getForm(request, response);
+    }
+
+    private Integer getDishFromRequest(HttpServletRequest request) {
+        if (isDishIsDefineInTheRequest(request)) {
+            return Integer.parseInt(request.getParameter("dishId"));
+        }
+        return null;
+    }
+
+    private boolean isDishIsDefineInTheRequest(HttpServletRequest request) {
+        return request.getParameter("dishId") != null;
+    }
+
+    private void createOrder(HttpServletRequest request, HttpServletResponse response) {
+        OrderDto orderDto = (OrderDto) request.getSession().getAttribute("orderDto");
+        processOrder(request, response, orderDto);
+        changeSessionAttribute(request);
+        redirect(response, PageAddresses.MENU.get());
+    }
+
+    private void processOrder(HttpServletRequest request, HttpServletResponse response, OrderDto orderDto){
+        try {
+            ORDER_SERVICE.createOrder(orderDto);
+        } catch (ServiceException ex) {
+            errorMessage = "Order has not been sent:(";
+            handleException(request, response, PageAddresses.MENU.get());
+        }
+    }
+
+    private void changeSessionAttribute(HttpServletRequest request) {
+        request.getSession().setAttribute("error", "The order has been successful created!");
+        request.getSession().removeAttribute("orderDto");
     }
 }
