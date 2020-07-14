@@ -6,7 +6,8 @@ public enum PageAddresses {
     AUTHORIZATION("/authorization"),
     MENU("/menu"),
     MENU_REGISTER("/WEB-INF/view/menuRegister.jsp"),
-    ORDER_PROCESSOR("/WEB-INF/view/orderProcessor.jsp");
+    ORDER_PROCESSOR("/WEB-INF/view/orderProcessor.jsp"),
+    ORDERS("/orders");
 
     private final String path;
 

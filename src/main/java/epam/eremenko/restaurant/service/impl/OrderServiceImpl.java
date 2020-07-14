@@ -1,6 +1,5 @@
 package epam.eremenko.restaurant.service.impl;
 
-import epam.eremenko.restaurant.config.PageAddresses;
 import epam.eremenko.restaurant.dao.Dao;
 import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dao.impl.DaoFactory;
@@ -14,10 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-public class OrderServiceImpl implements OrderService {
+class OrderServiceImpl implements OrderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderServiceImpl.class);
     private static final Dao<OrderDto, OrderTable> ORDER_DAO = DaoFactory.getInstance().getOrderDao();
-
 
     @Override
     public void addDish(OrderDto orderDto, MenuDto dish) {
@@ -55,8 +53,8 @@ public class OrderServiceImpl implements OrderService {
         LOGGER.debug("User " + orderDto.getUserId() + " has added the dish: " + dish.getId() + " to order");
     }
 
-    private double getRoundAmount(double x, double y){
-        return (double)Math.round((x + y) * 100d)/100d;
+    private double getRoundAmount(double x, double y) {
+        return (double) Math.round((x + y) * 100d) / 100d;
     }
 
     private boolean isDishAlreadyPresentIntoOrder(OrderDto orderDto, MenuDto dish) {
@@ -79,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
         addDishAsNewPosition(orderDto, dish);
     }
 
-    public void createOrder(OrderDto orderDto) throws ServiceException{
+    public void createOrder(OrderDto orderDto) throws ServiceException {
         try {
             ORDER_DAO.add(orderDto);
         } catch (DaoException ex) {
@@ -87,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void handleException(DaoException ex)throws ServiceException{
+    private void handleException(DaoException ex) throws ServiceException {
         LOGGER.debug(ex.toString());
         throw new ServiceException(ex.getMessage());
     }

@@ -2,16 +2,19 @@ package epam.eremenko.restaurant.controller.command;
 
 
 import epam.eremenko.restaurant.config.PageAddresses;
+import epam.eremenko.restaurant.config.ReportTypes;
 import epam.eremenko.restaurant.config.UserRoles;
 import epam.eremenko.restaurant.dto.DtoFactory;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.OrderDto;
+import epam.eremenko.restaurant.dto.ReportDto;
 import epam.eremenko.restaurant.dto.UserDto;
-import epam.eremenko.restaurant.entity.BeanFactory;
 import epam.eremenko.restaurant.entity.Menu;
+import epam.eremenko.restaurant.entity.Report;
 import epam.eremenko.restaurant.entity.User;
 import epam.eremenko.restaurant.service.MenuService;
 import epam.eremenko.restaurant.service.OrderService;
+import epam.eremenko.restaurant.service.ReportService;
 import epam.eremenko.restaurant.service.UserService;
 import epam.eremenko.restaurant.service.exception.ServiceException;
 import epam.eremenko.restaurant.service.impl.ServiceFactory;
@@ -25,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-class CommandImpl {
+class Commander {
 
     final Command LOCALE_CHANGER = this::changeLocale;
     final Command REGISTER = this::signUp;
@@ -38,15 +41,18 @@ class CommandImpl {
     final Command CUSTOMER_FORMS_GETTER = this::getCustomerForm;
     final Command USE_TLD_TAG = this::useTldTag;
     final Command ORDER_CREATOR = this::createOrder;
+    final Command REPORTER = this::getReport;
 
     private static final UserService USER_SERVICE = ServiceFactory.getInstance().getUserService();
     private static final MenuService MENU_SERVICE = ServiceFactory.getInstance().getMenuService();
     private static final OrderService ORDER_SERVICE = ServiceFactory.getInstance().getOrderService();
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandImpl.class);
-    private static final int PAGINATION_RECORDS_PER_PAGE = 5;
+    private static final ReportService REPORT_SERVICE = ServiceFactory.getInstance().getReportService();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Commander.class);
+    private static final int PAGINATION_RECORDS_PER_MENU_PAGE = 5;
+    private static final int PAGINATION_RECORDS_PER_ORDERS_PAGE = 10;
     private static final int PAGINATION_START_PAGE = 1;
     private int paginationCurrentPage;
-    private String errorMessage;
+    private String message;
 
 
     private void changeLocale(HttpServletRequest request, HttpServletResponse response) {
@@ -67,8 +73,17 @@ class CommandImpl {
         try {
             createUser(request, response, userDto);
         } catch (ServiceException ex) {
-            errorMessage = ex.getMessage();
+            message = ex.getMessage();
             handleException(request, response, PageAddresses.AUTHORIZATION.get());
+        }
+    }
+
+    private void handleException(HttpServletRequest request, HttpServletResponse response, String pagePath) {
+        request.getSession().setAttribute("message", message);
+        try {
+            response.sendRedirect(pagePath);
+        } catch (IOException ex) {
+            LOGGER.error(ex.toString());
         }
     }
 
@@ -83,7 +98,7 @@ class CommandImpl {
         try {
             executeEntry(request, response, userDto);
         } catch (ServiceException ex) {
-            errorMessage = ex.getMessage();
+            message = ex.getMessage();
             handleException(request, response, PageAddresses.AUTHORIZATION.get());
         }
     }
@@ -92,6 +107,7 @@ class CommandImpl {
                               UserDto userDto) throws ServiceException {
         User user = USER_SERVICE.get(userDto);
         setSessionAttributes(request, user);
+        getOrdersIfUserIsCustomer(request);
         redirect(response, PageAddresses.MENU.get());
     }
 
@@ -101,12 +117,10 @@ class CommandImpl {
         session.setAttribute("role", user.getRole().get());
     }
 
-    private void handleException(HttpServletRequest request, HttpServletResponse response, String pagePath) {
-        request.getSession().setAttribute("error", errorMessage);
-        try {
-            response.sendRedirect(pagePath);
-        } catch (IOException ex) {
-            LOGGER.error(ex.toString());
+    private void getOrdersIfUserIsCustomer(HttpServletRequest request) throws ServiceException {
+        if (isUserIsCustomer(request)) {
+            String reportType = ReportTypes.ACTUAL_USER_ORDERS.get();
+            paginateReport(request, reportType);
         }
     }
 
@@ -156,7 +170,7 @@ class CommandImpl {
         try {
             tryAddDishToMenu(response, menuDto, price);
         } catch (ServiceException ex) {
-            errorMessage = ex.getMessage();
+            message = ex.getMessage();
             handleException(request, response, PageAddresses.MENU.get());
         }
     }
@@ -168,13 +182,29 @@ class CommandImpl {
     }
 
     private void getMenu(HttpServletRequest request, HttpServletResponse response) {
+        try{
+            doGetMenu(request, response);
+        } catch (ServiceException ex){
+            message = ex.getMessage();
+            handleException(request, response, PageAddresses.MENU.get());
+        }
+    }
+
+    private void doGetMenu(HttpServletRequest request, HttpServletResponse response)
+    throws ServiceException{
         String category = request.getParameter("category");
         MenuDto menuDto = DtoFactory.getMenuDto(category);
-        definePaginationCurrentPageParameter(request);
-        Menu menu = collectDishesToMenu(request, response, menuDto);
-        int quantityOfPages = MENU_SERVICE.getQuantityOfDishPagesIntoMenu(menu, PAGINATION_RECORDS_PER_PAGE);
-        setSessionAttributes(request, category, menu, quantityOfPages);
+        paginateMenu(request, menuDto);
         redirect(response, PageAddresses.MENU.get());
+    }
+
+    private void paginateMenu(HttpServletRequest request,
+                              MenuDto menuDto) throws ServiceException {
+        definePaginationCurrentPageParameter(request);
+        Menu menu = collectDishesToMenu(menuDto);
+        String category = menuDto.getCategory();
+        int quantityOfPages = MENU_SERVICE.getQuantityOfDishPagesIntoMenu(menu, PAGINATION_RECORDS_PER_MENU_PAGE);
+        setSessionAttributes(request, category, menu, quantityOfPages);
     }
 
     private void definePaginationCurrentPageParameter(HttpServletRequest request) {
@@ -192,23 +222,16 @@ class CommandImpl {
         return request.getParameter("page") != null;
     }
 
-    private Menu collectDishesToMenu(HttpServletRequest request, HttpServletResponse response, MenuDto menuDto) {
-        Menu menu = BeanFactory.getInstance().getMenu();
-        try {
-            return MENU_SERVICE.get(menuDto, paginationCurrentPage, PAGINATION_RECORDS_PER_PAGE);
-        } catch (ServiceException ex) {
-            errorMessage = ex.getMessage();
-            handleException(request, response, PageAddresses.MENU.get());
-        }
-        return menu;
+    private Menu collectDishesToMenu(MenuDto menuDto) throws ServiceException {
+        return MENU_SERVICE.get(menuDto, paginationCurrentPage, PAGINATION_RECORDS_PER_MENU_PAGE);
     }
 
-    private void setSessionAttributes(HttpServletRequest request, String category, Menu menu, int quantityOfPages) {
-        HttpSession session = request.getSession();
-        session.setAttribute("category", category);
-        session.setAttribute("menu", menu);
-        session.setAttribute("quantityOfPages", quantityOfPages);
-        session.setAttribute("currentPage", paginationCurrentPage);
+    private void setSessionAttributes(HttpServletRequest request, String category,
+                                      Menu menu, int quantityOfPages) {
+        request.getSession().setAttribute("category", category);
+        request.getSession().setAttribute("menu", menu);
+        request.getSession().setAttribute("quantityOfPages", quantityOfPages);
+        request.getSession().setAttribute("currentPage", paginationCurrentPage);
     }
 
     private void collectOrder(HttpServletRequest request, HttpServletResponse response) {
@@ -273,23 +296,80 @@ class CommandImpl {
     }
 
     private void createOrder(HttpServletRequest request, HttpServletResponse response) {
-        OrderDto orderDto = (OrderDto) request.getSession().getAttribute("orderDto");
-        processOrder(request, response, orderDto);
-        changeSessionAttribute(request);
-        redirect(response, PageAddresses.MENU.get());
-    }
-
-    private void processOrder(HttpServletRequest request, HttpServletResponse response, OrderDto orderDto){
         try {
-            ORDER_SERVICE.createOrder(orderDto);
+            doCreateOrder(request, response);
         } catch (ServiceException ex) {
-            errorMessage = "Order has not been sent:(";
+            message = "Order has not been sent:(";
             handleException(request, response, PageAddresses.MENU.get());
         }
     }
 
+    private void doCreateOrder(HttpServletRequest request,
+                               HttpServletResponse response) throws ServiceException{
+        OrderDto orderDto = (OrderDto) request.getSession().getAttribute("orderDto");
+        processOrder(orderDto);
+        changeSessionAttribute(request);
+        getReport(request, response);
+        redirect(response, PageAddresses.MENU.get());
+    }
+
+    private void processOrder(OrderDto orderDto) throws ServiceException {
+            ORDER_SERVICE.createOrder(orderDto);
+    }
+
     private void changeSessionAttribute(HttpServletRequest request) {
-        request.getSession().setAttribute("error", "The order has been successful created!");
+        request.getSession().setAttribute("message", "The order has been successful created!");
         request.getSession().removeAttribute("orderDto");
+    }
+
+    private void getReport(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            checkBeforeReporting(request, response);
+        } catch (ServiceException ex){
+            message = ex.getMessage();
+            handleException(request, response, PageAddresses.MAIN.get());
+        }
+    }
+
+    private void checkBeforeReporting(HttpServletRequest request, HttpServletResponse response)
+    throws ServiceException{
+        if (isUserDefineInTheSession(request)) {
+            doGetReport(request, response);
+        } else {
+            redirect(response, PageAddresses.AUTHORIZATION.get());
+        }
+    }
+
+    private void doGetReport(HttpServletRequest request, HttpServletResponse response)
+    throws ServiceException{
+        String reportType = request.getParameter("reportType");
+        paginateReport(request, reportType);
+        redirect(response, PageAddresses.ORDERS.get());
+    }
+
+    private void paginateReport(HttpServletRequest request,
+                                String reportType) throws ServiceException {
+        ReportDto reportDto = getReportDtoAccordingRequestParameters(request, reportType);
+        definePaginationCurrentPageParameter(request);
+        Report report = getReportFromDatabase(reportDto);
+        int quantityOfPages = REPORT_SERVICE.getQuantityOfPages(report, PAGINATION_RECORDS_PER_ORDERS_PAGE);
+        setSessionAttributes(request, reportType, report, quantityOfPages);
+    }
+
+    private ReportDto getReportDtoAccordingRequestParameters(HttpServletRequest request, String reportType) {
+        User user = (User) request.getSession().getAttribute("user");
+        return DtoFactory.getReportDto(user, reportType);
+    }
+
+    private Report getReportFromDatabase(ReportDto reportDto) throws  ServiceException {
+            return REPORT_SERVICE.get(reportDto, paginationCurrentPage, PAGINATION_RECORDS_PER_ORDERS_PAGE);
+    }
+
+    private void setSessionAttributes(HttpServletRequest request, String reportType,
+                                      Report report, int quantityOfPages) {
+        request.getSession().setAttribute("reportType", reportType);
+        request.getSession().setAttribute("report", report);
+        request.getSession().setAttribute("quantityOfOrderPages", quantityOfPages);
+        request.getSession().setAttribute("currentPage", paginationCurrentPage);
     }
 }

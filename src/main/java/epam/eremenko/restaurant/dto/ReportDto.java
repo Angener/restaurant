@@ -1,11 +1,14 @@
 package epam.eremenko.restaurant.dto;
 
+import epam.eremenko.restaurant.config.ReportTypes;
+
 import java.util.List;
 import java.util.Objects;
 
 public class ReportDto extends Dto {
     private List<OrderDto> orders;
     private int userId;
+    private ReportTypes type;
 
     public ReportDto(){}
 
@@ -23,6 +26,14 @@ public class ReportDto extends Dto {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public ReportTypes getType() {
+        return type;
+    }
+
+    public void setType(ReportTypes type) {
+        this.type = type;
     }
 
     @Override

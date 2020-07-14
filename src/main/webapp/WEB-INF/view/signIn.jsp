@@ -15,13 +15,21 @@
   </title>  
 </head>
 <body>
-  <header>
+    <header>
       <div class="container">
       <a href="/" class="logo"><fmt:message key="main.siteName" bundle="${loc}"/></a>
         <nav>
             <ul>
               <li><a href="/restaurant"><fmt:message key="main.homeButton" bundle="${loc}"/></a></li>
               <li><a href="controller?command=GET_MENU&category=All"><fmt:message key="main.menu" bundle="${loc}"/></a></li>
+              <c:choose>
+                <c:when test="${role eq 'admin'}">
+                  <li><a href="/orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
+                </c:when>
+                <c:when test="${role eq 'customer' && report.orders != null}">
+                  <li><a href="controller?command=GET_REPORT&reportType=actual_user_orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
+                </c:when>
+              </c:choose>
               <li>
                 <c:choose>
                 <c:when test="${user != null}">
@@ -72,7 +80,7 @@
           <input type="submit" value=<fmt:message key="signIn.signUpMessage" bundle="${loc}"/>>
         </form>
       </div>
-      <c:out value="${error}"/>
+      <c:out value="${message}"/>
     </div>
   </div>
 </body>

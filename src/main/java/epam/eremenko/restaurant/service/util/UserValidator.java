@@ -40,8 +40,8 @@ public class UserValidator {
     }
 
     private void validatePassword(UserDto userDto) {
-        if (userDto.getPassword().length() <= MIN_PASSWORD_LENGTH) {
-            stringBuilder.append("Password minimal length is 2 letter. ");
+        if (userDto.getPassword().length() < MIN_PASSWORD_LENGTH) {
+            stringBuilder.append("Password minimal length is 4 letter. ");
         }
     }
 
