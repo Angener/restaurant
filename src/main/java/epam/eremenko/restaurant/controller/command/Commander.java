@@ -237,7 +237,7 @@ class Commander {
         request.getSession().setAttribute("category", category);
         request.getSession().setAttribute("menu", menu);
         request.getSession().setAttribute("quantityOfPages", quantityOfPages);
-        request.getSession().setAttribute("currentPage", paginationCurrentPage);
+        request.getSession().setAttribute("currentMenuPage", paginationCurrentPage);
     }
 
     private void collectOrder(HttpServletRequest request, HttpServletResponse response) {
@@ -384,7 +384,7 @@ class Commander {
         request.getSession().setAttribute("reportType", reportType);
         request.getSession().setAttribute("report", report);
         request.getSession().setAttribute("quantityOfOrderPages", quantityOfPages);
-        request.getSession().setAttribute("currentPage", paginationCurrentPage);
+        request.getSession().setAttribute("currentReportPage", paginationCurrentPage);
     }
 
     private void getOrder(HttpServletRequest request, HttpServletResponse response) {

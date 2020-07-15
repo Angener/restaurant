@@ -156,8 +156,8 @@
 <%-- PAGINATION  --%>
  <c:if test="${quantityOfPages > 1}">
 	<%--For displaying Previous link except for the 1st page --%>
-    <c:if test="${currentPage != 1}">
-        <td><a href="controller?command=GET_MENU&category=${category}&page=${currentPage - 1}">Previous</a></td>
+    <c:if test="${currentMenuPage != 1}">
+        <td><a href="controller?command=GET_MENU&category=${category}&page=${currentMenuPage - 1}">Previous</a></td>
     </c:if>
  
     <%--For displaying Page numbers. 
@@ -166,7 +166,7 @@
         <tr>
             <c:forEach begin="1" end="${quantityOfPages}" var="i">
                 <c:choose>
-                    <c:when test="${currentPage eq i}">
+                    <c:when test="${currentMenuPage eq i}">
                         <td>${i}</td>
                     </c:when>
                     <c:otherwise>
@@ -178,8 +178,8 @@
     </table>
      
     <%--For displaying Next link --%>
-    <c:if test="${currentPage lt quantityOfPages}">
-        <td><a href="controller?command=GET_MENU&category=${category}&page=${currentPage + 1}">Next</a></td>
+    <c:if test="${currentMenuPage lt quantityOfPages}">
+        <td><a href="controller?command=GET_MENU&category=${category}&page=${currentMenuPage + 1}">Next</a></td>
     </c:if>
 </c:if>
 
