@@ -1,7 +1,6 @@
 package epam.eremenko.restaurant.dao.impl;
 
 import epam.eremenko.restaurant.dao.Dao;
-import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dao.table.OrderTable;
 import epam.eremenko.restaurant.dto.DtoFactory;
 import epam.eremenko.restaurant.dto.OrderDto;
@@ -16,37 +15,48 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public class OrderReporter extends DaoImpl<ReportDto, OrderTable> implements Dao<ReportDto, OrderTable> {
+public class ReportDao extends DaoImpl<ReportDto, OrderTable> implements Dao<ReportDto, OrderTable> {
 
     @Override
-    public ReportDto doGet(ReportDto report) throws SQLException {
+    public ReportDto doGet(ReportDto reportDto) throws SQLException {
         List<OrderDto> orders = new ArrayList<>();
-        int userId = report.getUserId();
-        getOrders(userId, orders);
+        getOrders(reportDto, orders);
         return DtoFactory.getReportDto(orders);
     }
 
-    private void getOrders(int userId, List<OrderDto> orders)
+    private void getOrders(ReportDto reportDto, List<OrderDto> orders)
             throws SQLException {
-        connectionsPool.connect(getSqlQueryRetrievingOrderReportByUserOrAllCompanyOrders(userId),
+        connectionsPool.connect(defineSqlQuery(reportDto),
                 preparedStatement -> executeGetQuery(preparedStatement, orders));
     }
 
-    private String getSqlQueryRetrievingOrderReportByUserOrAllCompanyOrders(int userId) {
-        if (userId == 0) {
-            return getSqlQueryGettingAllCompanyOrders();
-        } else {
-            return getSqlQueryGettingAllUserOrders(userId);
-        }
+    private String defineSqlQuery(ReportDto reportDto) {
+        return switch (reportDto.getType()) {
+            case ACTUAL_USER_ORDERS -> getSqlQueryGettingActualUserOrders(reportDto);
+            case INCOMPLETE_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_PAID, 0);
+            case UNAPPROVED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_APPROVED, 0);
+            case UNSENT_TO_KITCHEN_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_PASSED, 0);
+            case UNCOOKED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_COOKED, 0);
+            case NOT_BILLED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_BILLED, 0);
+            case COMPLETED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_PAID, 1);
+            case ALL_ORDERS -> getSqlQueryGettingAllOrders();
+        };
     }
 
-    private String getSqlQueryGettingAllCompanyOrders() {
-        return "SELECT * FROM " + OrderTable.TABLE_NAME.get();
-    }
-
-    private String getSqlQueryGettingAllUserOrders(int userId) {
+    private String getSqlQueryGettingActualUserOrders(ReportDto reportDto) {
+        int userId = reportDto.getUserId();
         return "SELECT * FROM " + OrderTable.TABLE_NAME.get() +
-                " WHERE " + OrderTable.USER_ID + " = '" + userId + "'";
+                " WHERE " + OrderTable.USER_ID + " = '" + userId + "'" +
+                " AND " + OrderTable.IS_PAID + " = 0";
+    }
+
+    private String getSqlQueryGettingReportByParameter(OrderTable parameter, int value) {
+        return "SELECT * FROM " + OrderTable.TABLE_NAME.get() +
+                " WHERE " + parameter + " = '" + value + "'";
+    }
+
+    private String getSqlQueryGettingAllOrders() {
+        return "SELECT * FROM " + OrderTable.TABLE_NAME.get();
     }
 
     private void executeGetQuery(PreparedStatement ps,
@@ -86,14 +96,14 @@ public class OrderReporter extends DaoImpl<ReportDto, OrderTable> implements Dao
     }
 
     @Override
-    void doAdd(ReportDto reportDto) throws SQLException, InterruptedException {
+    void doAdd(ReportDto reportDto) {
     }
 
     @Override
-    void doUpdate(OrderTable orderTable, ReportDto reportDto) throws SQLException {
+    void doUpdate(OrderTable orderTable, ReportDto reportDto) {
     }
 
     @Override
-    public void delete(ReportDto dto) throws DaoException {
+    public void delete(ReportDto dto) {
     }
 }

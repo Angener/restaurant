@@ -1,6 +1,6 @@
 package epam.eremenko.restaurant.service.util;
 
-import epam.eremenko.restaurant.config.MenuCategories;
+import epam.eremenko.restaurant.attribute.MenuCategories;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.service.exception.ServiceException;
 

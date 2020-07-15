@@ -1,12 +1,14 @@
 package epam.eremenko.restaurant.service.impl;
 
-import epam.eremenko.restaurant.config.PageAddresses;
 import epam.eremenko.restaurant.dao.Dao;
 import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dao.impl.DaoFactory;
 import epam.eremenko.restaurant.dao.table.OrderTable;
+import epam.eremenko.restaurant.dto.DtoFactory;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.OrderDto;
+import epam.eremenko.restaurant.entity.BeanFactory;
+import epam.eremenko.restaurant.entity.Order;
 import epam.eremenko.restaurant.service.OrderService;
 import epam.eremenko.restaurant.service.exception.ServiceException;
 import org.slf4j.Logger;
@@ -14,10 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-public class OrderServiceImpl implements OrderService {
+class OrderServiceImpl implements OrderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderServiceImpl.class);
     private static final Dao<OrderDto, OrderTable> ORDER_DAO = DaoFactory.getInstance().getOrderDao();
-
 
     @Override
     public void addDish(OrderDto orderDto, MenuDto dish) {
@@ -55,8 +56,8 @@ public class OrderServiceImpl implements OrderService {
         LOGGER.debug("User " + orderDto.getUserId() + " has added the dish: " + dish.getId() + " to order");
     }
 
-    private double getRoundAmount(double x, double y){
-        return (double)Math.round((x + y) * 100d)/100d;
+    private double getRoundAmount(double x, double y) {
+        return (double) Math.round((x + y) * 100d) / 100d;
     }
 
     private boolean isDishAlreadyPresentIntoOrder(OrderDto orderDto, MenuDto dish) {
@@ -79,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
         addDishAsNewPosition(orderDto, dish);
     }
 
-    public void createOrder(OrderDto orderDto) throws ServiceException{
+    public void createOrder(OrderDto orderDto) throws ServiceException {
         try {
             ORDER_DAO.add(orderDto);
         } catch (DaoException ex) {
@@ -87,8 +88,40 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void handleException(DaoException ex)throws ServiceException{
+    private void handleException(DaoException ex) throws ServiceException {
         LOGGER.debug(ex.toString());
         throw new ServiceException(ex.getMessage());
+    }
+
+    public Order get(OrderDto orderDto) throws ServiceException {
+        try {
+            return doGet(orderDto);
+        } catch (DaoException ex) {
+            handleException(ex);
+        }
+        return null;
+    }
+
+    private Order doGet(OrderDto orderDto) throws DaoException {
+        orderDto = ORDER_DAO.get(orderDto);
+        return BeanFactory.getInstance().getOrder(orderDto);
+    }
+
+    public void delete(OrderDto orderDto) throws ServiceException {
+        try {
+            ORDER_DAO.delete(orderDto);
+        } catch (DaoException ex) {
+            handleException(ex);
+        }
+    }
+
+    public void update(Order order) throws ServiceException{
+        try {
+            OrderTable updatableColumn = order.getUpdatableColumn();
+            OrderDto orderDto = DtoFactory.getOrderDto(order);
+            ORDER_DAO.update(updatableColumn, orderDto);
+        } catch (DaoException ex){
+            handleException(ex);
+        }
     }
 }

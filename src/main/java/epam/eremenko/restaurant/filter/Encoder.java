@@ -9,7 +9,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class EncodingFilter implements Filter {
+public class Encoder implements Filter {
     private static final String CONTENT_TYPE = "text/html; charset=UTF-8";
     private static final String CHARACTER_ENCODING = "UTF-8";
     private String encoding;

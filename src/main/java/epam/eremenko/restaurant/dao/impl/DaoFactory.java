@@ -17,7 +17,7 @@ public final class DaoFactory {
     private final Dao<MenuDto, MenuTable> menuDao = new MenuDao();
     private final Dao<OrderDto, OrderTable> orderDao = new OrderDao();
     private final Dao<ImageDto, ImageTable> imageDao = new ImageDao();
-    private final Dao<ReportDto, OrderTable> reporter = new OrderReporter();
+    private final Dao<ReportDto, OrderTable> reporter = new ReportDao();
 
 
     private DaoFactory() {

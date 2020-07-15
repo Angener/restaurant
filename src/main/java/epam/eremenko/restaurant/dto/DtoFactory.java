@@ -1,10 +1,13 @@
 package epam.eremenko.restaurant.dto;
 
+import epam.eremenko.restaurant.attribute.ReportTypes;
 import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dao.table.OrderMenuTable;
 import epam.eremenko.restaurant.dao.table.OrderTable;
 import epam.eremenko.restaurant.dao.table.UserTable;
-import epam.eremenko.restaurant.config.UserRoles;
+import epam.eremenko.restaurant.attribute.UserRoles;
+import epam.eremenko.restaurant.entity.Order;
+import epam.eremenko.restaurant.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
@@ -95,21 +98,41 @@ public final class DtoFactory {
         defineOrdersDtoFields(order, param);
     }
 
-    public static OrderDto getOrderDto(int userId){
+    public static OrderDto getOrderDto(int orderId){
+        OrderDto orderDto = new OrderDto();
+        orderDto.setId(orderId);
+        return orderDto;
+    }
+
+    public static OrderDto getOrderDto(Order order){
+        OrderDto orderDto = new OrderDto();
+        orderDto.setId(order.getId());
+        orderDto.setDishes(order.getDishes());
+        orderDto.setOrderDate(order.getOrderDate());
+        orderDto.setTotalAmount(order.getTotalAmount());
+        orderDto.setUserId(order.getUserId());
+        orderDto.setIsApproved(order.isApproved());
+        orderDto.setIsPassed(order.isPassed());
+        orderDto.setIsCooked(order.isCooked());
+        orderDto.setIsBilled(order.isBilled());
+        orderDto.setIsPaid(order.isPaid());
+        return orderDto;
+    }
+
+    public static OrderDto getOrderDto(User user) {
         OrderDto order = new OrderDto();
-        order.setUserId(userId);
+        order.setUserId(user.getId());
         return order;
     }
 
-    public static OrderDto getOrderDto(Map<OrderTable, String> param){
+    public static OrderDto getOrderDto(Map<OrderTable, String> param) {
         OrderDto order = new OrderDto();
-        order.setId(Integer.parseInt(param.get(OrderTable.USER_ID)));
+        order.setId(Integer.parseInt(param.get(OrderTable.ORDER_ID)));
         defineOrdersDtoFields(order, param);
         return order;
     }
 
-    private static void defineOrdersDtoFields(OrderDto order, Map<OrderTable, String> param){
-
+    private static void defineOrdersDtoFields(OrderDto order, Map<OrderTable, String> param) {
         order.setTotalAmount(Double.parseDouble(param.get(OrderTable.TOTAL_AMOUNT)));
         order.setIsApproved(castToBoolean(param.get(OrderTable.IS_APPROVED)));
         order.setIsPassed(castToBoolean(param.get(OrderTable.IS_PASSED)));
@@ -146,7 +169,7 @@ public final class DtoFactory {
         return menuDto;
     }
 
-    public static MenuDto getMenuDto(int dishId, int dishQuantity, double price, String name){
+    public static MenuDto getMenuDto(int dishId, int dishQuantity, double price, String name) {
         MenuDto dish = new MenuDto();
         dish.setId(dishId);
         dish.setQuantity(dishQuantity);
@@ -156,13 +179,20 @@ public final class DtoFactory {
         return dish;
     }
 
-    private static double calculateAmount(int dishQuantity, double price){
+    private static double calculateAmount(int dishQuantity, double price) {
         return dishQuantity * price;
     }
 
-    public static ReportDto getReportDto(List<OrderDto> orders){
+    public static ReportDto getReportDto(List<OrderDto> orders) {
         ReportDto report = new ReportDto();
         report.setOrders(new ArrayList<>(orders));
         return report;
+    }
+
+    public static ReportDto getReportDto(User user, String reportType) {
+        ReportDto reportDto = new ReportDto();
+        reportDto.setType(Enum.valueOf(ReportTypes.class, reportType.toUpperCase()));
+        reportDto.setUserId(user.getId());
+        return reportDto;
     }
 }

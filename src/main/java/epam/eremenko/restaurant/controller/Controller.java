@@ -12,23 +12,23 @@ public class Controller extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        clearErrors(request);
+        clearMessage(request);
         CommandFactory.valueOf(request.getParameter("command")).get().execute(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        clearErrors(request);
+        clearMessage(request);
         CommandFactory.valueOf(request.getParameter("command")).get().execute(request, response);
     }
 
-    private void clearErrors(HttpServletRequest request) {
+    private void clearMessage(HttpServletRequest request) {
         if (isErrorExists(request.getSession())) {
-            request.getSession().removeAttribute("error");
+            request.getSession().removeAttribute("message");
         }
     }
 
     private boolean isErrorExists(HttpSession session) {
-        return session.getAttribute("error") != null;
+        return session.getAttribute("message") != null;
     }
 }

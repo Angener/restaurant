@@ -8,6 +8,8 @@ public class ImageDto extends Dto {
     private String path;
     private int dishId;
 
+    public ImageDto(){}
+
     public List<String> getImages() {
         return images;
     }
