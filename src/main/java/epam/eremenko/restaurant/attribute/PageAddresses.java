@@ -1,4 +1,4 @@
-package epam.eremenko.restaurant.config;
+package epam.eremenko.restaurant.attribute;
 
 public enum PageAddresses {
 
@@ -7,7 +7,8 @@ public enum PageAddresses {
     MENU("/menu"),
     MENU_REGISTER("/WEB-INF/view/menuRegister.jsp"),
     ORDER_PROCESSOR("/WEB-INF/view/orderProcessor.jsp"),
-    ORDERS("/orders");
+    ORDERS("/orders"),
+    ORDER_CARD("/WEB-INF/view/orderCard.jsp");
 
     private final String path;
 

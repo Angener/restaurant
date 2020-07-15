@@ -4,8 +4,11 @@ import epam.eremenko.restaurant.dao.Dao;
 import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dao.impl.DaoFactory;
 import epam.eremenko.restaurant.dao.table.OrderTable;
+import epam.eremenko.restaurant.dto.DtoFactory;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.OrderDto;
+import epam.eremenko.restaurant.entity.BeanFactory;
+import epam.eremenko.restaurant.entity.Order;
 import epam.eremenko.restaurant.service.OrderService;
 import epam.eremenko.restaurant.service.exception.ServiceException;
 import org.slf4j.Logger;
@@ -88,5 +91,37 @@ class OrderServiceImpl implements OrderService {
     private void handleException(DaoException ex) throws ServiceException {
         LOGGER.debug(ex.toString());
         throw new ServiceException(ex.getMessage());
+    }
+
+    public Order get(OrderDto orderDto) throws ServiceException {
+        try {
+            return doGet(orderDto);
+        } catch (DaoException ex) {
+            handleException(ex);
+        }
+        return null;
+    }
+
+    private Order doGet(OrderDto orderDto) throws DaoException {
+        orderDto = ORDER_DAO.get(orderDto);
+        return BeanFactory.getInstance().getOrder(orderDto);
+    }
+
+    public void delete(OrderDto orderDto) throws ServiceException {
+        try {
+            ORDER_DAO.delete(orderDto);
+        } catch (DaoException ex) {
+            handleException(ex);
+        }
+    }
+
+    public void update(Order order) throws ServiceException{
+        try {
+            OrderTable updatableColumn = order.getUpdatableColumn();
+            OrderDto orderDto = DtoFactory.getOrderDto(order);
+            ORDER_DAO.update(updatableColumn, orderDto);
+        } catch (DaoException ex){
+            handleException(ex);
+        }
     }
 }

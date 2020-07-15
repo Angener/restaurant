@@ -15,7 +15,7 @@
   </title>  
 </head>
 <body>
-    <header>
+   <header>
       <div class="container">
       <a href="/" class="logo"><fmt:message key="main.siteName" bundle="${loc}"/></a>
         <nav>
@@ -26,7 +26,7 @@
                 <c:when test="${role eq 'admin'}">
                   <li><a href="/orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
                 </c:when>
-                <c:when test="${role eq 'customer' && report.orders != null}">
+                <c:when test="${role eq 'customer' && report.orders.size() != 0}">
                   <li><a href="controller?command=GET_REPORT&reportType=actual_user_orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
                 </c:when>
               </c:choose>

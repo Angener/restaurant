@@ -1,11 +1,12 @@
 package epam.eremenko.restaurant.dto;
 
-import epam.eremenko.restaurant.config.ReportTypes;
+import epam.eremenko.restaurant.attribute.ReportTypes;
 import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dao.table.OrderMenuTable;
 import epam.eremenko.restaurant.dao.table.OrderTable;
 import epam.eremenko.restaurant.dao.table.UserTable;
-import epam.eremenko.restaurant.config.UserRoles;
+import epam.eremenko.restaurant.attribute.UserRoles;
+import epam.eremenko.restaurant.entity.Order;
 import epam.eremenko.restaurant.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -97,9 +98,30 @@ public final class DtoFactory {
         defineOrdersDtoFields(order, param);
     }
 
-    public static OrderDto getOrderDto(int userId) {
+    public static OrderDto getOrderDto(int orderId){
+        OrderDto orderDto = new OrderDto();
+        orderDto.setId(orderId);
+        return orderDto;
+    }
+
+    public static OrderDto getOrderDto(Order order){
+        OrderDto orderDto = new OrderDto();
+        orderDto.setId(order.getId());
+        orderDto.setDishes(order.getDishes());
+        orderDto.setOrderDate(order.getOrderDate());
+        orderDto.setTotalAmount(order.getTotalAmount());
+        orderDto.setUserId(order.getUserId());
+        orderDto.setIsApproved(order.isApproved());
+        orderDto.setIsPassed(order.isPassed());
+        orderDto.setIsCooked(order.isCooked());
+        orderDto.setIsBilled(order.isBilled());
+        orderDto.setIsPaid(order.isPaid());
+        return orderDto;
+    }
+
+    public static OrderDto getOrderDto(User user) {
         OrderDto order = new OrderDto();
-        order.setUserId(userId);
+        order.setUserId(user.getId());
         return order;
     }
 

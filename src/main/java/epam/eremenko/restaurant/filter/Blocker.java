@@ -1,6 +1,6 @@
 package epam.eremenko.restaurant.filter;
 
-import epam.eremenko.restaurant.config.PageAddresses;
+import epam.eremenko.restaurant.attribute.PageAddresses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

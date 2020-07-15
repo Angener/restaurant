@@ -1,6 +1,6 @@
 package epam.eremenko.restaurant.dto;
 
-import epam.eremenko.restaurant.config.UserRoles;
+import epam.eremenko.restaurant.attribute.UserRoles;
 
 import java.sql.Timestamp;
 

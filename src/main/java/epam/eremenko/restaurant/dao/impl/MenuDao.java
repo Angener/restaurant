@@ -1,7 +1,7 @@
 package epam.eremenko.restaurant.dao.impl;
 
 import epam.eremenko.restaurant.dao.table.ImageTable;
-import epam.eremenko.restaurant.config.MenuCategories;
+import epam.eremenko.restaurant.attribute.MenuCategories;
 import epam.eremenko.restaurant.dao.table.MenuTable;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.DtoFactory;

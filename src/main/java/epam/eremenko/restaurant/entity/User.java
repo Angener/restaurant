@@ -1,6 +1,6 @@
 package epam.eremenko.restaurant.entity;
 
-import epam.eremenko.restaurant.config.UserRoles;
+import epam.eremenko.restaurant.attribute.UserRoles;
 
 import java.io.Serializable;
 import java.sql.Timestamp;

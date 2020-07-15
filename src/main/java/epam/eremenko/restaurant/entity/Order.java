@@ -1,13 +1,13 @@
 package epam.eremenko.restaurant.entity;
 
-import epam.eremenko.restaurant.config.OrderStatuses;
+import epam.eremenko.restaurant.attribute.OrderStatuses;
+import epam.eremenko.restaurant.dao.table.OrderTable;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.OrderDto;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +24,7 @@ public class Order implements Serializable {
     private boolean isBilled;
     private boolean isPaid;
     private OrderStatuses status;
+    private OrderTable updatableColumn;
 
     public Order() {
     }
@@ -47,14 +48,14 @@ public class Order implements Serializable {
     }
 
     private List<Boolean> putBooleanFieldsWithTrueValuesToList() {
-       List<Boolean> executionSteps = new ArrayList<>();
-       executionSteps.add(isApproved);
-       executionSteps.add(isPassed);
-       executionSteps.add(isCooked);
-       executionSteps.add(isBilled);
-       executionSteps.add(isPaid);
-       executionSteps.removeIf(s -> s.equals(false));
-       return executionSteps;
+        List<Boolean> executionSteps = new ArrayList<>();
+        executionSteps.add(isApproved);
+        executionSteps.add(isPassed);
+        executionSteps.add(isCooked);
+        executionSteps.add(isBilled);
+        executionSteps.add(isPaid);
+        executionSteps.removeIf(s -> s.equals(false));
+        return executionSteps;
     }
 
     private OrderStatuses chooseStatus(List<Boolean> executionSteps) {
@@ -66,6 +67,41 @@ public class Order implements Serializable {
             case 5 -> OrderStatuses.COMPLETED;
             default -> OrderStatuses.PROCESSING;
         };
+    }
+
+    public void changeStatus(OrderStatuses status) {
+        switch (status) {
+            case APPROVED -> changeIsApproved();
+            case PROCESSING -> changeIsPassed();
+            case COOKED -> changeIsCooked();
+            case PENDING_PAYMENT -> changeIsBilled();
+            case COMPLETED -> changeIsPaid();
+        }
+    }
+
+    private void changeIsApproved() {
+        isApproved = true;
+        updatableColumn = OrderTable.IS_APPROVED;
+    }
+
+    private void changeIsPassed() {
+        isPassed = true;
+        updatableColumn = OrderTable.IS_PASSED;
+    }
+
+    private void changeIsCooked() {
+        isCooked = true;
+        updatableColumn = OrderTable.IS_COOKED;
+    }
+
+    private void changeIsBilled() {
+        isBilled = true;
+        updatableColumn = OrderTable.IS_BILLED;
+    }
+
+    private void changeIsPaid() {
+        isPaid = true;
+        updatableColumn = OrderTable.IS_PAID;
     }
 
     public int getId() {
@@ -156,6 +192,14 @@ public class Order implements Serializable {
         isPaid = paid;
     }
 
+    public OrderTable getUpdatableColumn() {
+        return updatableColumn;
+    }
+
+    public void setUpdatableColumn(OrderTable updatableField) {
+        this.updatableColumn = updatableField;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -171,13 +215,14 @@ public class Order implements Serializable {
                 isPaid == order.isPaid &&
                 Objects.equals(dishes, order.dishes) &&
                 Objects.equals(orderDate, order.orderDate) &&
-                status == order.status;
+                status == order.status &&
+                updatableColumn == order.updatableColumn;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, dishes, orderDate, totalAmount, userId,
-                isApproved, isPassed, isCooked, isBilled, isPaid, status);
+        return Objects.hash(id, dishes, orderDate, totalAmount, userId, isApproved,
+                isPassed, isCooked, isBilled, isPaid, status, updatableColumn);
     }
 
     @Override
@@ -194,6 +239,7 @@ public class Order implements Serializable {
                 ", isBilled=" + isBilled +
                 ", isPaid=" + isPaid +
                 ", status=" + status +
+                ", updatableField=" + updatableColumn +
                 '}';
     }
 }

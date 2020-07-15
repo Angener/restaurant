@@ -17,7 +17,7 @@
 </head>
 
 <body>
-  <header>
+ <header>
       <div class="container">
       <a href="/" class="logo"><fmt:message key="main.siteName" bundle="${loc}"/></a>
         <nav>
@@ -28,7 +28,7 @@
                 <c:when test="${role eq 'admin'}">
                   <li><a href="/orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
                 </c:when>
-                <c:when test="${role eq 'customer' && report.orders != null}">
+                <c:when test="${role eq 'customer' && report.orders.size() != 0}">
                   <li><a href="controller?command=GET_REPORT&reportType=actual_user_orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
                 </c:when>
               </c:choose>
@@ -111,7 +111,7 @@
      <c:out value="${message}"/>
 
 <table>
-  <c:if test="${report.orders.size() != 0}">
+  <c:if test="${report.orders.size() > 0}">
     <tr>
       <th><fmt:message key="orders.table.column.orderId" bundle="${loc}"/></th>
       <th><fmt:message key="orders.table.column.date" bundle="${loc}"/></th>
@@ -122,17 +122,16 @@
   <c:forEach var="order" items="${report.orders}">
       <tr>
         <td><p align="center"><c:out value="${order.id}"/></p></td>
-        <td><p align="center"><c:out value="${order.orderDate}"/></p></td>
+        <td><p align="center"> <fmt:formatDate value="${order.orderDate}" type="both" dateStyle="long"/></p></td>
         <td><p align="center"><c:out value="${order.totalAmount}"/></p></td>
         <td><p align="center"><fmt:message key="${order.status.status}" bundle="${loc}"/></p></td>
         <td>
-          <form action="" method="post" >
-            <button type="submit">
+              <form action="controller?command=GET_ORDER&orderId=${order.id}&form=ORDER_CARD" method="post" >
+              <button type="submit">
               <fmt:message key="orders.table.button.view" bundle="${loc}"/>
             </button>
           </form> 
         </td>
-      </li>
     </tr>
   </c:forEach>
 </table>

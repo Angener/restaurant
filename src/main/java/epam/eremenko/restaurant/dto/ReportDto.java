@@ -1,6 +1,6 @@
 package epam.eremenko.restaurant.dto;
 
-import epam.eremenko.restaurant.config.ReportTypes;
+import epam.eremenko.restaurant.attribute.ReportTypes;
 
 import java.util.List;
 import java.util.Objects;

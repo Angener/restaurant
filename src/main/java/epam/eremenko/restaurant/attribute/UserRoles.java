@@ -1,4 +1,4 @@
-package epam.eremenko.restaurant.config;
+package epam.eremenko.restaurant.attribute;
 
 public enum UserRoles {
     ADMIN("admin"),

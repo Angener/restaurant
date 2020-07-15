@@ -1,15 +1,17 @@
 package epam.eremenko.restaurant.controller.command;
 
 
-import epam.eremenko.restaurant.config.PageAddresses;
-import epam.eremenko.restaurant.config.ReportTypes;
-import epam.eremenko.restaurant.config.UserRoles;
+import epam.eremenko.restaurant.attribute.OrderStatuses;
+import epam.eremenko.restaurant.attribute.PageAddresses;
+import epam.eremenko.restaurant.attribute.ReportTypes;
+import epam.eremenko.restaurant.attribute.UserRoles;
 import epam.eremenko.restaurant.dto.DtoFactory;
 import epam.eremenko.restaurant.dto.MenuDto;
 import epam.eremenko.restaurant.dto.OrderDto;
 import epam.eremenko.restaurant.dto.ReportDto;
 import epam.eremenko.restaurant.dto.UserDto;
 import epam.eremenko.restaurant.entity.Menu;
+import epam.eremenko.restaurant.entity.Order;
 import epam.eremenko.restaurant.entity.Report;
 import epam.eremenko.restaurant.entity.User;
 import epam.eremenko.restaurant.service.MenuService;
@@ -42,6 +44,10 @@ class Commander {
     final Command USE_TLD_TAG = this::useTldTag;
     final Command ORDER_CREATOR = this::createOrder;
     final Command REPORTER = this::getReport;
+    final Command ORDER_GETTER = this::getOrder;
+    final Command FORM_GETTER = this::getAuthorizedUserForm;
+    final Command ORDER_CANCELER = this::cancelOrder;
+    final Command STATUS_CHANGER = this::changeOrderStatus;
 
     private static final UserService USER_SERVICE = ServiceFactory.getInstance().getUserService();
     private static final MenuService MENU_SERVICE = ServiceFactory.getInstance().getMenuService();
@@ -182,16 +188,16 @@ class Commander {
     }
 
     private void getMenu(HttpServletRequest request, HttpServletResponse response) {
-        try{
+        try {
             doGetMenu(request, response);
-        } catch (ServiceException ex){
+        } catch (ServiceException ex) {
             message = ex.getMessage();
             handleException(request, response, PageAddresses.MENU.get());
         }
     }
 
     private void doGetMenu(HttpServletRequest request, HttpServletResponse response)
-    throws ServiceException{
+            throws ServiceException {
         String category = request.getParameter("category");
         MenuDto menuDto = DtoFactory.getMenuDto(category);
         paginateMenu(request, menuDto);
@@ -245,7 +251,7 @@ class Commander {
     private OrderDto getOrderDto(HttpServletRequest request) {
         if (isOrderDtoAlreadyDefineInSession(request)) {
             User user = (User) request.getSession().getAttribute("user");
-            return DtoFactory.getOrderDto(user.getId());
+            return DtoFactory.getOrderDto(user);
         } else {
             return (OrderDto) request.getSession().getAttribute("orderDto");
         }
@@ -305,19 +311,19 @@ class Commander {
     }
 
     private void doCreateOrder(HttpServletRequest request,
-                               HttpServletResponse response) throws ServiceException{
+                               HttpServletResponse response) throws ServiceException {
         OrderDto orderDto = (OrderDto) request.getSession().getAttribute("orderDto");
         processOrder(orderDto);
         changeSessionAttribute(request);
         getReport(request, response);
-        redirect(response, PageAddresses.MENU.get());
     }
 
     private void processOrder(OrderDto orderDto) throws ServiceException {
-            ORDER_SERVICE.createOrder(orderDto);
+        ORDER_SERVICE.createOrder(orderDto);
     }
 
     private void changeSessionAttribute(HttpServletRequest request) {
+        request.getSession().setAttribute("reportType", ReportTypes.ACTUAL_USER_ORDERS.get());
         request.getSession().setAttribute("message", "The order has been successful created!");
         request.getSession().removeAttribute("orderDto");
     }
@@ -325,14 +331,14 @@ class Commander {
     private void getReport(HttpServletRequest request, HttpServletResponse response) {
         try {
             checkBeforeReporting(request, response);
-        } catch (ServiceException ex){
+        } catch (ServiceException ex) {
             message = ex.getMessage();
             handleException(request, response, PageAddresses.MAIN.get());
         }
     }
 
     private void checkBeforeReporting(HttpServletRequest request, HttpServletResponse response)
-    throws ServiceException{
+            throws ServiceException {
         if (isUserDefineInTheSession(request)) {
             doGetReport(request, response);
         } else {
@@ -341,10 +347,18 @@ class Commander {
     }
 
     private void doGetReport(HttpServletRequest request, HttpServletResponse response)
-    throws ServiceException{
-        String reportType = request.getParameter("reportType");
+            throws ServiceException {
+        String reportType = getReportType(request);
         paginateReport(request, reportType);
         redirect(response, PageAddresses.ORDERS.get());
+    }
+
+    private String getReportType(HttpServletRequest request) {
+        if (request.getParameter("reportType") != null) {
+            return request.getParameter("reportType");
+        } else {
+            return String.valueOf(request.getSession().getAttribute("reportType"));
+        }
     }
 
     private void paginateReport(HttpServletRequest request,
@@ -361,8 +375,8 @@ class Commander {
         return DtoFactory.getReportDto(user, reportType);
     }
 
-    private Report getReportFromDatabase(ReportDto reportDto) throws  ServiceException {
-            return REPORT_SERVICE.get(reportDto, paginationCurrentPage, PAGINATION_RECORDS_PER_ORDERS_PAGE);
+    private Report getReportFromDatabase(ReportDto reportDto) throws ServiceException {
+        return REPORT_SERVICE.get(reportDto, paginationCurrentPage, PAGINATION_RECORDS_PER_ORDERS_PAGE);
     }
 
     private void setSessionAttributes(HttpServletRequest request, String reportType,
@@ -371,5 +385,90 @@ class Commander {
         request.getSession().setAttribute("report", report);
         request.getSession().setAttribute("quantityOfOrderPages", quantityOfPages);
         request.getSession().setAttribute("currentPage", paginationCurrentPage);
+    }
+
+    private void getOrder(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            doGetOrder(request, response);
+        } catch (ServiceException ex) {
+            message = "Order has been deleted.";
+            handleException(request, response, PageAddresses.ORDERS.get());
+        }
+    }
+
+    private void doGetOrder(HttpServletRequest request, HttpServletResponse response) throws ServiceException {
+        request.getSession().setAttribute("order", getOrderFromDatabase(request));
+        getAuthorizedUserForm(request, response);
+    }
+
+    private Order getOrderFromDatabase(HttpServletRequest request) throws ServiceException {
+        int orderId = Integer.parseInt(request.getParameter("orderId"));
+        OrderDto orderDto = DtoFactory.getOrderDto(orderId);
+        return ORDER_SERVICE.get(orderDto);
+    }
+
+    private void getAuthorizedUserForm(HttpServletRequest request, HttpServletResponse response) {
+        if (isUserDefineInTheSession(request)) {
+            getForm(request, response);
+        } else {
+            forwardToAuthorization(request, response);
+        }
+    }
+
+    private void cancelOrder(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            doDelete(request, response);
+        } catch (ServiceException ex) {
+            message = "Operation is impossible: order is already approved";
+            handleException(request, response, PageAddresses.ORDERS.get());
+        }
+    }
+
+    private void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServiceException {
+        Order order = getOrderFromDatabase(request);
+        if (isOrderIsNotApprovedYet(order)) {
+            ORDER_SERVICE.delete(DtoFactory.getOrderDto(order.getId()));
+            getReport(request, response);
+        }
+    }
+
+    private boolean isOrderIsNotApprovedYet(Order order) {
+        return order != null && !order.isApproved();
+    }
+
+    private synchronized void changeOrderStatus(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            doChangeStatus(request, response);
+        } catch (ServiceException ex) {
+            message = "Status changing is impossible";
+            handleException(request, response, PageAddresses.ORDER_CARD.get());
+        }
+    }
+
+    private void doChangeStatus(HttpServletRequest request, HttpServletResponse response) throws ServiceException {
+        Order order = (Order) request.getSession().getAttribute("order");
+        OrderStatuses status = OrderStatuses.valueOf(request.getParameter("changeableStatus"));
+        changeOrderStatusAfterChecking(order, status);
+        getReport(request, response);
+    }
+
+    private void changeOrderStatusAfterChecking(Order order, OrderStatuses status) throws  ServiceException{
+        if (status.equals(OrderStatuses.APPROVED)) {
+            approveOrderIfItIsExistsAndHasNotBeenApprovedBefore(order, status);
+        } else {
+            approveOrder(status, order);
+        }
+    }
+
+    private void approveOrderIfItIsExistsAndHasNotBeenApprovedBefore(Order order, OrderStatuses status)
+            throws ServiceException {
+        if (isOrderIsNotApprovedYet(order)) {
+            approveOrder(status, order);
+        }
+    }
+
+    private void approveOrder(OrderStatuses status, Order order) throws ServiceException {
+        order.changeStatus(status);
+        ORDER_SERVICE.update(order);
     }
 }

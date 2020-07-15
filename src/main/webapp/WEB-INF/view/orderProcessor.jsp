@@ -27,7 +27,7 @@
                 <c:when test="${role eq 'admin'}">
                   <li><a href="/orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
                 </c:when>
-                <c:when test="${role eq 'customer' && report.orders != null}">
+                <c:when test="${role eq 'customer' && report.orders.size() != 0}">
                   <li><a href="controller?command=GET_REPORT&reportType=actual_user_orders"><fmt:message key="main.orders" bundle="${loc}"/></a></li>
                 </c:when>
               </c:choose>
@@ -81,7 +81,6 @@
     <th><fmt:message key="orderProcessor.table.amount" bundle="${loc}"/></th>
   </tr>
   <c:forEach var="preOrder" items="${orderDto.dishes}">
-
       <tr>
         <td><p><c:out value="${preOrder.name}"/></p></td>
         <td><p class="price" align="center"><c:out value="${preOrder.price}"/></p></td>
@@ -89,9 +88,6 @@
         <td><p class="price" align="center"><c:out value="${preOrder.amount}"/></p></td>
         <td>
           <form action="controller?command=USE_TLD_TAG&key=deleteDish&dishId=${preOrder.id}&form=ORDER_PROCESSOR" method="post" >
-
-
-
             <button type="submit">
               <fmt:message key="orderProcessor.button.delete" bundle="${loc}"/>
             </button>
