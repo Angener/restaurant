@@ -3,7 +3,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 
 
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -65,67 +64,14 @@
   <div class="container">
       <div class="row">
       <div class="col-1-1"> 
-
-        <c:if test="${role eq 'customer'}">
-
-          <c:choose>
-          <c:when test = "${order.isApproved() eq false}">
-            <form action="controller?command=CANCEL_ORDER&orderId=${order.id}" method="post" >
-            <button type="submit">
-              <fmt:message key="orderCard.button.cancel" bundle="${loc}"/>
-            </button>
-            </form>
-          </c:when>
-          <c:when test = "${order.isBilled() eq true && order.isPaid() eq false}">
-            <form action="controller?command=GET_CUSTOMER_FORM&form=BILL" method="post" >
+            <form action="controller?command=CHANGE_ORDER_STATUS&changeableStatus=COMPLETED" method="post" >
             <button type="submit">
               <fmt:message key="orderCard.button.pay" bundle="${loc}"/>
             </button>
-            </form>
-          </c:when>
-        </c:choose>
-
-        </c:if>
-
-
-      
-      <c:if test="${role eq 'admin'}">
-      <c:choose>
-      <c:when test = "${order.isApproved() eq false}">
-      <form action="controller?command=CHANGE_ORDER_STATUS&changeableStatus=APPROVED" method="post" >
-          <button type="submit">
-            <fmt:message key="orderCard.button.approve" bundle="${loc}"/>
-          </button>
-        </form>
-      </c:when>
-      <c:when test = "${order.isApproved() eq true && order.isPassed() eq false}">
-      <form action="controller?command=CHANGE_ORDER_STATUS&changeableStatus=PROCESSING" method="post" >
-          <button type="submit">
-            <fmt:message key="orderCard.button.pass" bundle="${loc}"/>
-          </button>
-        </form>
-      </c:when>
-      <c:when test = "${order.isPassed() eq true && order.isCooked() eq false}">
-      <form action="controller?command=CHANGE_ORDER_STATUS&changeableStatus=COOKED" method="post" >
-          <button type="submit">
-            <fmt:message key="orderCard.button.cook" bundle="${loc}"/>
-          </button>
-        </form>
-      </c:when>
-      <c:when test = "${order.isCooked() eq true && order.isBilled() eq false}">
-      <form action="controller?command=CHANGE_ORDER_STATUS&changeableStatus=PENDING_PAYMENT" method="post" >
-          <button type="submit">
-            <fmt:message key="orderCard.button.bill" bundle="${loc}"/>
-          </button>
-        </form>
-      </c:when>
-    </c:choose>
-      </c:if>
+            </form>      
+  
 </div>
-
-
-    
-    </div>
+  </div>
 
 
     <div class="row">
@@ -136,14 +82,14 @@
 
   
 
- 
+ <h1><fmt:message key="bill.bill" bundle="${loc}"/></h1>
 
   <div class="col-2-3">
      <c:out value="${message}"/>
      <table>
        <tr>
         <td>
-          <fmt:message key="orderCard.table.orderId" bundle="${loc}"/>
+          <fmt:message key="bill.table.order" bundle="${loc}"/>
         </td>
         <td>
           <c:out value="${order.id}"/>
@@ -151,7 +97,7 @@
        </tr>
         <tr>
         <td>
-          <fmt:message key="orderCard.table.date" bundle="${loc}"/>
+          <fmt:message key="bill.table.date" bundle="${loc}"/>
         </td>
         <td>
           <fmt:formatDate value="${order.orderDate}" type="both" dateStyle="long" /> 
@@ -159,20 +105,14 @@
        </tr>
        <tr>
         <td>
-          <fmt:message key="orderCard.table.amount" bundle="${loc}"/>
+          <fmt:message key="bill.table.user" bundle="${loc}"/>
         </td>
         <td>
-          <c:out value="${order.totalAmount}"/>
+          <c:out value="${user.username}"/>
         </td>
        </tr>
-        <tr>
-        <td>
-          <fmt:message key="orderCard.table.status" bundle="${loc}"/>
-        </td>
-        <td>
-          <fmt:message key="${order.status.status}" bundle="${loc}"/>
-        </td>
-       </tr>
+       
+        
      </table>
 
 
@@ -181,19 +121,30 @@
 <c:set var="position" value="0"/>
 <table>
   <tr>
-    <th><fmt:message key="orderCard.table.position" bundle="${loc}"/></th>
-    <th><fmt:message key="orderCard.table.name" bundle="${loc}"/></th>
-    <th><fmt:message key="orderCard.table.quantity" bundle="${loc}"/></th>
+    <th><fmt:message key="bill.table.position" bundle="${loc}"/></th>
+    <th><fmt:message key="bill.table.dishName" bundle="${loc}"/></th>
+    <th><fmt:message key="bill.table.price" bundle="${loc}"/></th>
+    <th><fmt:message key="bill.table.quantity" bundle="${loc}"/></th>
+    <th><fmt:message key="bill.table.amount" bundle="${loc}"/></th>
   </tr>
   <c:forEach var="dish" items="${order.dishes}">
   <c:set var="position" value="${position + 1}"/>
       <tr>
         <td><p><c:out value="${position}"/></p></td>
         <td><p><c:out value="${dish.name}"/></p></td>
-        <td><p class="price" align="center"><c:out value="${dish.quantity}"/></p></td>
+        <td><p class="price" align="right"><c:out value="${dish.price}"/></p></td>
+        <td><p align="center"><c:out value="${dish.quantity}"/></p></td>
+        <td><p class="price" align="right"><c:out value="${dish.amount}"/></p></td>
       </tr>
   </c:forEach>
+  <tr>
+  	<td><td><td></td></td></td>
+    <td><strong><p><fmt:message key="bill.table.totalAmount" bundle="${loc}"/></p></strong></td>
+    <td><strong><p class="price"><c:out value="${order.totalAmount}"/></p></strong></td>
+  </tr>
   </table>
+
+
 
 
 

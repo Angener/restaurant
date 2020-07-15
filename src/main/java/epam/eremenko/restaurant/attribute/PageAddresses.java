@@ -8,7 +8,8 @@ public enum PageAddresses {
     MENU_REGISTER("/WEB-INF/view/menuRegister.jsp"),
     ORDER_PROCESSOR("/WEB-INF/view/orderProcessor.jsp"),
     ORDERS("/orders"),
-    ORDER_CARD("/WEB-INF/view/orderCard.jsp");
+    ORDER_CARD("/WEB-INF/view/orderCard.jsp"),
+    BILL("/WEB-INF/view/bill.jsp");
 
     private final String path;
 
