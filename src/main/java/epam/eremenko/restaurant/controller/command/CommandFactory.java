@@ -9,6 +9,8 @@ public enum CommandFactory {
     GET_ADMIN_FORM(new Commander().ADMIN_FORMS_GETTER),
     ADD_DISH(new Commander().MENU_CREATOR),
     GET_MENU(new Commander().MENU_SUPPLIER),
+    EDIT_MENU(new Commander().MENU_EDITOR),
+    UPDATE_DISH(new Commander().DISH_UPDATER),
     ADD_TO_ORDER(new Commander().ORDER_COLLECTOR),
     GET_CUSTOMER_FORM(new Commander().CUSTOMER_FORMS_GETTER),
     USE_TLD_TAG(new Commander().USE_TLD_TAG),

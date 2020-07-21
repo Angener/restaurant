@@ -7,10 +7,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class UserValidator {
+public final class UserValidator {
 
-    private Pattern pattern;
-    private Matcher matcher;
+    private static Pattern pattern;
+    private static Matcher matcher;
 
     private final StringBuilder stringBuilder = new StringBuilder();
     private static final String EMAIL_PATTERN =
@@ -24,6 +24,7 @@ public class UserValidator {
 
 
     public void validate(UserDto userDto) throws ServiceException {
+        resetStringBuilder();
         validateEmail(userDto);
         validatePhone(userDto);
         validatePassword(userDto);
@@ -31,17 +32,21 @@ public class UserValidator {
         throwAnException();
     }
 
+    private void resetStringBuilder(){
+        stringBuilder.delete(0, stringBuilder.length());
+    }
+
     private void validateEmail(UserDto userDto) {
         pattern = Pattern.compile(EMAIL_PATTERN);
         matcher = pattern.matcher(userDto.getEmail());
         if (!matcher.matches()) {
-            stringBuilder.append("Email is invalid. ");
+            stringBuilder.append("message.error.singIn.email ");
         }
     }
 
     private void validatePassword(UserDto userDto) {
         if (userDto.getPassword().length() < MIN_PASSWORD_LENGTH) {
-            stringBuilder.append("Password minimal length is 4 letter. ");
+            stringBuilder.append("message.error.signIn.passwordLength ");
         }
     }
 
@@ -49,14 +54,14 @@ public class UserValidator {
         pattern = Pattern.compile(MOBILE_PATTERN);
         matcher = pattern.matcher(userDto.getMobile());
         if (!matcher.matches()) {
-            stringBuilder.append("Phone number is invalid. ");
+            stringBuilder.append("message.error.signIn.phone ");
         }
     }
 
     private void validateUsername(UserDto userDto) {
         if (userDto.getUsername().length() <= MIN_USERNAME_LENGTH ||
                 userDto.getUsername().length() >= MAX_USERNAME_LENGTH) {
-            stringBuilder.append("Username minimal length is 2 letter. ");
+            stringBuilder.append("message.error.signIn.usernameLength ");
         }
     }
 

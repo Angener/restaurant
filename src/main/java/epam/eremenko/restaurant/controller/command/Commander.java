@@ -29,6 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 class Commander {
 
@@ -39,6 +43,7 @@ class Commander {
     final Command ADMIN_FORMS_GETTER = this::getAdminForm;
     final Command MENU_CREATOR = this::addDish;
     final Command MENU_SUPPLIER = this::getMenu;
+    final Command DISH_UPDATER = this::updateDish;
     final Command ORDER_COLLECTOR = this::collectOrder;
     final Command CUSTOMER_FORMS_GETTER = this::getCustomerForm;
     final Command USE_TLD_TAG = this::useTldTag;
@@ -48,6 +53,7 @@ class Commander {
     final Command FORM_GETTER = this::getAuthorizedUserForm;
     final Command ORDER_CANCELER = this::cancelOrder;
     final Command STATUS_CHANGER = this::changeOrderStatus;
+    final Command MENU_EDITOR = this::editMenu;
 
     private static final UserService USER_SERVICE = ServiceFactory.getInstance().getUserService();
     private static final MenuService MENU_SERVICE = ServiceFactory.getInstance().getMenuService();
@@ -57,8 +63,9 @@ class Commander {
     private static final int PAGINATION_RECORDS_PER_MENU_PAGE = 5;
     private static final int PAGINATION_RECORDS_PER_ORDERS_PAGE = 10;
     private static final int PAGINATION_START_PAGE = 1;
+    private List<String> message;
     private int paginationCurrentPage;
-    private String message;
+
 
 
     private void changeLocale(HttpServletRequest request, HttpServletResponse response) {
@@ -79,13 +86,21 @@ class Commander {
         try {
             createUser(request, response, userDto);
         } catch (ServiceException ex) {
-            message = ex.getMessage();
+            setMessage(ex);
             handleException(request, response, PageAddresses.AUTHORIZATION.get());
         }
     }
 
+    private void setMessage(ServiceException ex){
+        message = new ArrayList<>(Arrays.asList(ex.getMessage().trim().split(" ")));
+    }
+
+    private void setMessage(String message){
+        this.message = Collections.singletonList(message);
+    }
+
     private void handleException(HttpServletRequest request, HttpServletResponse response, String pagePath) {
-        request.getSession().setAttribute("message", message);
+        request.getSession().setAttribute("messages", message);
         try {
             response.sendRedirect(pagePath);
         } catch (IOException ex) {
@@ -104,7 +119,7 @@ class Commander {
         try {
             executeEntry(request, response, userDto);
         } catch (ServiceException ex) {
-            message = ex.getMessage();
+            setMessage(ex);
             handleException(request, response, PageAddresses.AUTHORIZATION.get());
         }
     }
@@ -176,7 +191,7 @@ class Commander {
         try {
             tryAddDishToMenu(response, menuDto, price);
         } catch (ServiceException ex) {
-            message = ex.getMessage();
+            setMessage(ex);
             handleException(request, response, PageAddresses.MENU.get());
         }
     }
@@ -191,17 +206,24 @@ class Commander {
         try {
             doGetMenu(request, response);
         } catch (ServiceException ex) {
-            message = ex.getMessage();
+            setMessage(ex);
             handleException(request, response, PageAddresses.MENU.get());
         }
     }
 
     private void doGetMenu(HttpServletRequest request, HttpServletResponse response)
             throws ServiceException {
+        setCategoriesIntoSessionIfItIsNotHasBeenSet(request);
         String category = request.getParameter("category");
         MenuDto menuDto = DtoFactory.getMenuDto(category);
         paginateMenu(request, menuDto);
         redirect(response, PageAddresses.MENU.get());
+    }
+
+    private void setCategoriesIntoSessionIfItIsNotHasBeenSet(HttpServletRequest request){
+        if (request.getSession().getAttribute("categories") == null){
+            request.getSession().setAttribute("categories", MENU_SERVICE.getCategories());
+        }
     }
 
     private void paginateMenu(HttpServletRequest request,
@@ -305,7 +327,7 @@ class Commander {
         try {
             doCreateOrder(request, response);
         } catch (ServiceException ex) {
-            message = "Order has not been sent:(";
+            setMessage("message.error.Commander.orderFail");
             handleException(request, response, PageAddresses.MENU.get());
         }
     }
@@ -324,7 +346,7 @@ class Commander {
 
     private void changeSessionAttribute(HttpServletRequest request) {
         request.getSession().setAttribute("reportType", ReportTypes.ACTUAL_USER_ORDERS.get());
-        request.getSession().setAttribute("message", "The order has been successful created!");
+        request.getSession().setAttribute("message", "message.operation.Commander.orderCreate");
         request.getSession().removeAttribute("orderDto");
     }
 
@@ -332,7 +354,7 @@ class Commander {
         try {
             checkBeforeReporting(request, response);
         } catch (ServiceException ex) {
-            message = ex.getMessage();
+            setMessage(ex);
             handleException(request, response, PageAddresses.MAIN.get());
         }
     }
@@ -391,7 +413,7 @@ class Commander {
         try {
             doGetOrder(request, response);
         } catch (ServiceException ex) {
-            message = "Order has been deleted.";
+            setMessage("message.operation.Commander.orderDelete");
             handleException(request, response, PageAddresses.ORDERS.get());
         }
     }
@@ -419,7 +441,7 @@ class Commander {
         try {
             doDelete(request, response);
         } catch (ServiceException ex) {
-            message = "Operation is impossible: order is already approved";
+            setMessage("message.error.Commander.orderCancelFail");
             handleException(request, response, PageAddresses.ORDERS.get());
         }
     }
@@ -440,7 +462,7 @@ class Commander {
         try {
             doChangeStatus(request, response);
         } catch (ServiceException ex) {
-            message = "Status changing is impossible";
+            setMessage("message.error.Commander.statusChanging");
             handleException(request, response, PageAddresses.ORDER_CARD.get());
         }
     }
@@ -452,7 +474,7 @@ class Commander {
         getReport(request, response);
     }
 
-    private void changeOrderStatusAfterChecking(Order order, OrderStatuses status) throws  ServiceException{
+    private void changeOrderStatusAfterChecking(Order order, OrderStatuses status) throws ServiceException {
         if (status.equals(OrderStatuses.APPROVED)) {
             approveOrderIfItIsExistsAndHasNotBeenApprovedBefore(order, status);
         } else {
@@ -470,5 +492,36 @@ class Commander {
     private void approveOrder(OrderStatuses status, Order order) throws ServiceException {
         order.changeStatus(status);
         ORDER_SERVICE.update(order);
+    }
+
+    private void editMenu(HttpServletRequest request, HttpServletResponse response) {
+        Menu menu = (Menu) request.getSession().getAttribute("menu");
+        int dishId = Integer.parseInt(request.getParameter("dishId"));
+        MenuDto menuDto = DtoFactory.getMenuDto(menu, dishId);
+        setAttributes(request, menuDto);
+        getAdminForm(request, response);
+    }
+
+    private void setAttributes(HttpServletRequest request, MenuDto menuDto){
+        setCategoriesIntoSessionIfItIsNotHasBeenSet(request);
+        request.getSession().setAttribute("dish", menuDto);
+    }
+
+    private void updateDish(HttpServletRequest request, HttpServletResponse response){
+        try{
+            doUpdateDish(request, response);
+        }catch (ServiceException ex){
+            setMessage("message.error.Commander.updating");
+            handleException(request, response, PageAddresses.MENU_EDITOR.get());
+        }
+    }
+
+    private void doUpdateDish(HttpServletRequest request, HttpServletResponse response) throws ServiceException{
+        MenuDto menuDto = (MenuDto) request.getSession().getAttribute("dish");
+        String changeableField = request.getParameter("changeableField");
+        String value = request.getParameter("value");
+        MENU_SERVICE.updateDish(menuDto, changeableField, value);
+        request.setAttribute("message", "message.operation.Commander.dishUpdate");
+        forward(request, response, PageAddresses.MENU_EDITOR.get());
     }
 }

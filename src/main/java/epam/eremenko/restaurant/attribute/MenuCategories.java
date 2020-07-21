@@ -9,11 +9,11 @@ public enum MenuCategories {
 
     private final String category;
 
-    MenuCategories(String category){
+    MenuCategories(String category) {
         this.category = category;
     }
 
-    public String get(){
+    public String get() {
         return category;
     }
 }

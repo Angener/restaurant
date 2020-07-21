@@ -46,4 +46,12 @@ public class Menu implements Serializable {
     public int hashCode() {
         return Objects.hash(dishes, dishesQuantity);
     }
+
+    @Override
+    public String toString() {
+        return "Menu{" +
+                "dishes=" + dishes +
+                ", dishesQuantity=" + dishesQuantity +
+                '}';
+    }
 }
