@@ -23,12 +23,12 @@ public class Controller extends HttpServlet {
     }
 
     private void clearMessage(HttpServletRequest request) {
-        if (isErrorExists(request.getSession())) {
+        if (isMessageExists(request.getSession())) {
             request.getSession().removeAttribute("messages");
         }
     }
 
-    private boolean isErrorExists(HttpSession session) {
+    private boolean isMessageExists(HttpSession session) {
         return session.getAttribute("messages") != null;
     }
 }
