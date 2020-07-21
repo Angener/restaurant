@@ -5,9 +5,8 @@ import epam.eremenko.restaurant.dao.connection.ConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,14 +20,14 @@ public final class CustomPool implements ConnectionPool {
     private static final CustomConnectionManager MANAGER = CustomConnectionManager.getInstance();
 
     public CustomPool() {
-        try (InputStream in = new FileInputStream(PROPERTIES_PATH)) {
+        try (FileReader in = new FileReader(PROPERTIES_PATH)) {
             setProp(in);
         } catch (IOException | SQLException ex) {
             LOGGER.warn(ex.toString());
         }
     }
 
-    private void setProp(InputStream in) throws IOException, SQLException {
+    private void setProp(FileReader in) throws IOException, SQLException {
         PROPERTIES.load(in);
         MANAGER.init(PROPERTIES);
     }
