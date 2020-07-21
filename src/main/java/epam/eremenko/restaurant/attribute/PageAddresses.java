@@ -5,9 +5,10 @@ public enum PageAddresses {
     MAIN("/restaurant"),
     AUTHORIZATION("/authorization"),
     MENU("/menu"),
-    MENU_REGISTER("/WEB-INF/view/menuRegister.jsp"),
-    ORDER_PROCESSOR("/WEB-INF/view/orderProcessor.jsp"),
     ORDERS("/orders"),
+    MENU_REGISTER("/WEB-INF/view/menuRegister.jsp"),
+    MENU_EDITOR("/WEB-INF/view/menuEditor.jsp"),
+    ORDER_PROCESSOR("/WEB-INF/view/orderProcessor.jsp"),
     ORDER_CARD("/WEB-INF/view/orderCard.jsp"),
     BILL("/WEB-INF/view/bill.jsp");
 

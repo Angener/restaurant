@@ -6,6 +6,7 @@ import epam.eremenko.restaurant.dao.table.OrderMenuTable;
 import epam.eremenko.restaurant.dao.table.OrderTable;
 import epam.eremenko.restaurant.dao.table.UserTable;
 import epam.eremenko.restaurant.attribute.UserRoles;
+import epam.eremenko.restaurant.entity.Menu;
 import epam.eremenko.restaurant.entity.Order;
 import epam.eremenko.restaurant.entity.User;
 
@@ -57,22 +58,6 @@ public final class DtoFactory {
         user.setMobile(param.get(UserTable.MOBILE));
         user.setRegistrationDate(Timestamp.valueOf(param.get(UserTable.REGISTERED)));
         return user;
-    }
-
-    public static UserDto getUserDto(String username, String password, String email, String mobile) {
-        UserDto userDto = new UserDto();
-        userDto.setUsername(username);
-        userDto.setPassword(password);
-        userDto.setEmail(email);
-        userDto.setMobile(mobile);
-        return userDto;
-    }
-
-    public static UserDto getUserDto(String username, String password) {
-        UserDto userDto = new UserDto();
-        userDto.setUsername(username);
-        userDto.setPassword(password);
-        return userDto;
     }
 
     public static UserDto getUserDto(HttpServletRequest request) {
@@ -147,14 +132,6 @@ public final class DtoFactory {
         return value.equals("1");
     }
 
-    public static MenuDto getMenuDto(String name, String category, String description) {
-        MenuDto menuDto = new MenuDto();
-        menuDto.setName(name);
-        menuDto.setCategory(category);
-        menuDto.setDescription(description);
-        return menuDto;
-    }
-
     public static MenuDto getMenuDto(String category) {
         MenuDto menuDto = new MenuDto();
         menuDto.setCategory(category);
@@ -177,6 +154,16 @@ public final class DtoFactory {
         dish.setName(name);
         dish.setAmount(calculateAmount(dishQuantity, price));
         return dish;
+    }
+
+    public static  MenuDto getMenuDto(Menu menu, int dishId){
+        MenuDto menuDto = null;
+        for(MenuDto dto : menu.getDishes()){
+            if (dto.getId() == dishId){
+                menuDto = dto;
+            }
+        }
+        return menuDto;
     }
 
     private static double calculateAmount(int dishQuantity, double price) {

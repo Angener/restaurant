@@ -11,6 +11,7 @@ import epam.eremenko.restaurant.service.UserService;
 import epam.eremenko.restaurant.service.exception.ServiceException;
 import epam.eremenko.restaurant.service.util.Encoder;
 import epam.eremenko.restaurant.service.util.UserValidator;
+import epam.eremenko.restaurant.service.util.UtilFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,9 @@ class UserServiceImpl implements UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
     private static final Dao<UserDto, UserTable> USER_DAO = DaoFactory.getInstance().getUserDao();
     private static final BeanFactory USER_FACTORY = BeanFactory.getInstance();
+    private static final Encoder ENCODER = UtilFactory.getInstance().getENCODER();
+    private final UserValidator userValidator = UtilFactory.getInstance().userValidator();
+
 
     public void add(UserDto userDto) throws ServiceException {
         validateDto(userDto);
@@ -27,11 +31,11 @@ class UserServiceImpl implements UserService {
     }
 
     private void validateDto(UserDto userDto) throws ServiceException {
-        new UserValidator().validate(userDto);
+        userValidator.validate(userDto);
     }
 
     private String encodePassword(String password) {
-        return Encoder.md5Apache(password);
+        return ENCODER.md5Apache(password);
     }
 
     private void saveUserToDatabase(UserDto userDto) throws ServiceException {
@@ -39,7 +43,7 @@ class UserServiceImpl implements UserService {
             USER_DAO.add(userDto);
         } catch (DaoException ex) {
             LOGGER.debug(ex.toString());
-            throw new ServiceException("Username already exists");
+            throw new ServiceException("message.error.signIn.userExists");
         }
     }
 
@@ -52,7 +56,7 @@ class UserServiceImpl implements UserService {
 
     private void checkPassword(String password, UserDto userDto) throws ServiceException {
         if (!password.equals(userDto.getPassword())) {
-            throw new ServiceException("Invalid password");
+            throw new ServiceException("message.error.signIn.password");
         }
     }
 
@@ -61,7 +65,7 @@ class UserServiceImpl implements UserService {
             return USER_DAO.get(userDto);
         } catch (DaoException ex) {
             LOGGER.debug(ex.getMessage());
-            throw new ServiceException("Incorrect data or user doesn't exist.");
+            throw new ServiceException("message.error.signIn.incorrectData");
         }
     }
 }

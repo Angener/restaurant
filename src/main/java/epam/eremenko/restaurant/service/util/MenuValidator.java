@@ -6,7 +6,7 @@ import epam.eremenko.restaurant.service.exception.ServiceException;
 
 import java.util.Arrays;
 
-public class MenuValidator {
+public final class MenuValidator {
     private final StringBuilder stringBuilder = new StringBuilder();
     private static final int MAX_NAME_LENGTH = 100;
     private static final int MIN_NAME_LENGTH = 3;
@@ -14,15 +14,21 @@ public class MenuValidator {
     private static final int MIN_DESCRIPTION_LENGTH = 10;
 
     public void validate(MenuDto menuDto, String price) throws ServiceException {
+        resetErrors();
         parsePriceFromText(menuDto, price);
-        checkCategory(menuDto);
-        checkName(menuDto);
-        checkDescription(menuDto);
+        checkCategory(menuDto.getCategory());
+        checkName(menuDto.getName());
+        checkDescription(menuDto.getDescription());
         throwAnException();
     }
 
+    public void resetErrors(){
+        stringBuilder.delete(0, stringBuilder.length());
+    }
+
     public void validate(MenuDto menuDto) throws ServiceException {
-        checkCategory(menuDto);
+        resetErrors();
+        checkCategory(menuDto.getCategory());
         throwAnException();
     }
 
@@ -30,25 +36,32 @@ public class MenuValidator {
         try {
             menuDto.setPrice(Double.parseDouble(price.replace(",", ".")));
         } catch (NumberFormatException ex) {
-            stringBuilder.append("Invalid price. ");
+            stringBuilder.append("message.error.menu.price ");
         }
     }
 
-    public void checkCategory(MenuDto menuDto) {
-        if (!isEligibleCategory(menuDto)) {
-            stringBuilder.append("Invalid category. ");
+    public void checkPrice (String price) {
+        try {
+           Double.parseDouble(price.replace(",", "."));
+        } catch (NumberFormatException ex) {
+            stringBuilder.append("message.error.menu.price ");
         }
     }
 
-    private boolean isEligibleCategory(MenuDto menuDto) {
+    public void checkCategory(String category) {
+        if (!isEligibleCategory(category)) {
+            stringBuilder.append("message.error.menu.category ");
+        }
+    }
+
+    private boolean isEligibleCategory(String category) {
         return Arrays.stream(MenuCategories.values())
-                .anyMatch(c -> c.get().equals(menuDto.getCategory()));
+                .anyMatch(c -> c.get().equals(category));
     }
 
-    private void checkName(MenuDto menuDto) {
-        String name = menuDto.getName();
+    public void checkName(String name) {
         if (isNameNotEligible(name)) {
-            stringBuilder.append("Name is invalid. ");
+            stringBuilder.append("message.error.menu.name ");
         }
     }
 
@@ -56,10 +69,9 @@ public class MenuValidator {
         return name == null || name.length() > MAX_NAME_LENGTH || name.length() < MIN_NAME_LENGTH;
     }
 
-    private void checkDescription(MenuDto menuDto) {
-        String description = menuDto.getDescription();
+    public void checkDescription(String description) {
         if (isDescriptionNotEligible(description)) {
-            stringBuilder.append("Description is invalid. ");
+            stringBuilder.append("message.error.menu.description ");
         }
     }
 
@@ -68,7 +80,7 @@ public class MenuValidator {
                 (description.length() < MIN_DESCRIPTION_LENGTH);
     }
 
-    private void throwAnException() throws ServiceException {
+    public void throwAnException() throws ServiceException {
         String errorMassage = stringBuilder.toString();
         if (!errorMassage.equals("")) {
             throw new ServiceException(errorMassage);
