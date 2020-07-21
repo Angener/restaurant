@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.List;
 
 class Commander {
-
     final Command LOCALE_CHANGER = this::changeLocale;
     final Command REGISTER = this::signUp;
     final Command SIGN_IN_INSPECTOR = this::signIn;
@@ -67,7 +66,6 @@ class Commander {
     private int paginationCurrentPage;
 
 
-
     private void changeLocale(HttpServletRequest request, HttpServletResponse response) {
         request.getSession(true).setAttribute("locale", request.getParameter("locale"));
         redirect(response, request.getHeader("referer"));
@@ -91,11 +89,11 @@ class Commander {
         }
     }
 
-    private void setMessage(ServiceException ex){
+    private void setMessage(ServiceException ex) {
         message = new ArrayList<>(Arrays.asList(ex.getMessage().trim().split(" ")));
     }
 
-    private void setMessage(String message){
+    private void setMessage(String message) {
         this.message = Collections.singletonList(message);
     }
 
@@ -220,8 +218,8 @@ class Commander {
         redirect(response, PageAddresses.MENU.get());
     }
 
-    private void setCategoriesIntoSessionIfItIsNotHasBeenSet(HttpServletRequest request){
-        if (request.getSession().getAttribute("categories") == null){
+    private void setCategoriesIntoSessionIfItIsNotHasBeenSet(HttpServletRequest request) {
+        if (request.getSession().getAttribute("categories") == null) {
             request.getSession().setAttribute("categories", MENU_SERVICE.getCategories());
         }
     }
@@ -502,21 +500,21 @@ class Commander {
         getAdminForm(request, response);
     }
 
-    private void setAttributes(HttpServletRequest request, MenuDto menuDto){
+    private void setAttributes(HttpServletRequest request, MenuDto menuDto) {
         setCategoriesIntoSessionIfItIsNotHasBeenSet(request);
         request.getSession().setAttribute("dish", menuDto);
     }
 
-    private void updateDish(HttpServletRequest request, HttpServletResponse response){
-        try{
+    private void updateDish(HttpServletRequest request, HttpServletResponse response) {
+        try {
             doUpdateDish(request, response);
-        }catch (ServiceException ex){
+        } catch (ServiceException ex) {
             setMessage("message.error.Commander.updating");
             handleException(request, response, PageAddresses.MENU_EDITOR.get());
         }
     }
 
-    private void doUpdateDish(HttpServletRequest request, HttpServletResponse response) throws ServiceException{
+    private void doUpdateDish(HttpServletRequest request, HttpServletResponse response) throws ServiceException {
         MenuDto menuDto = (MenuDto) request.getSession().getAttribute("dish");
         String changeableField = request.getParameter("changeableField");
         String value = request.getParameter("value");

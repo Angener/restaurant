@@ -30,17 +30,7 @@ public final class CustomPool implements ConnectionPool {
 
     private void setProp(InputStream in) throws IOException, SQLException {
         PROPERTIES.load(in);
-        MANAGER.setUrl(PROPERTIES.getProperty("url"));
-        MANAGER.setUser(PROPERTIES.getProperty("user"));
-        MANAGER.setPassword(PROPERTIES.getProperty("password"));
-        MANAGER.setUseUnicode(PROPERTIES.getProperty("useUnicode"));
-        MANAGER.setCharacterEncoding(PROPERTIES.getProperty("characterEncoding"));
-        MANAGER.setInitialPoolSize(Integer.parseInt(PROPERTIES.getProperty("initialPoolSize")));
-        MANAGER.setMinPoolSize(Integer.parseInt(PROPERTIES.getProperty("minPoolSize")));
-        MANAGER.setMaxPoolSize(Integer.parseInt(PROPERTIES.getProperty("maxPoolSize")));
-        MANAGER.setConnectThresholdPerConnection(Integer.parseInt(PROPERTIES.getProperty("threshold")));
-        MANAGER.setAcquireIncrement(Integer.parseInt(PROPERTIES.getProperty("acquireIncrement")));
-        MANAGER.init();
+        MANAGER.init(PROPERTIES);
     }
 
     @Override
@@ -56,8 +46,3 @@ public final class CustomPool implements ConnectionPool {
         }
     }
 }
-
-
-
-
-
