@@ -1,5 +1,7 @@
 package epam.eremenko.restaurant.service.impl;
 
+import epam.eremenko.restaurant.attribute.OrderStatuses;
+import epam.eremenko.restaurant.attribute.ReportTypes;
 import epam.eremenko.restaurant.dao.Dao;
 import epam.eremenko.restaurant.dao.exception.DaoException;
 import epam.eremenko.restaurant.dao.impl.DaoFactory;
@@ -33,8 +35,15 @@ class ReportServiceImpl implements ReportService {
 
     public Report get(ReportDto reportDto, int currentPage, int recordsPerPage) throws ServiceException{
         Report report = get(reportDto);
+        cutReportInCaseOfNeedUnapprovedOrders(reportDto, report);
         cutReport(report, currentPage, recordsPerPage);
         return report;
+    }
+
+    private void cutReportInCaseOfNeedUnapprovedOrders(ReportDto reportDto, Report report){
+        if (reportDto.getType().equals(ReportTypes.UNAPPROVED_ORDERS)){
+            report.getOrders().removeIf(r -> !r.getStatus().equals(OrderStatuses.PROCESSING));
+        }
     }
 
     private void cutReport(Report report, int currentPage, int recordsPerPage) {

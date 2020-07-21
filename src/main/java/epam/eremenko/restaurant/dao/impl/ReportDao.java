@@ -35,9 +35,9 @@ public class ReportDao extends DaoImpl<ReportDto, OrderTable> implements Dao<Rep
             case ACTUAL_USER_ORDERS -> getSqlQueryGettingActualUserOrders(reportDto);
             case INCOMPLETE_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_PAID, 0);
             case UNAPPROVED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_APPROVED, 0);
-            case UNSENT_TO_KITCHEN_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_PASSED, 0);
-            case UNCOOKED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_COOKED, 0);
-            case NOT_BILLED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_BILLED, 0);
+            case UNSENT_TO_KITCHEN_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_APPROVED, OrderTable.IS_PASSED);
+            case UNCOOKED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_PASSED, OrderTable.IS_COOKED);
+            case NOT_BILLED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_COOKED, OrderTable.IS_BILLED);
             case COMPLETED_ORDERS -> getSqlQueryGettingReportByParameter(OrderTable.IS_PAID, 1);
             case ALL_ORDERS -> getSqlQueryGettingAllOrders();
         };
@@ -49,6 +49,12 @@ public class ReportDao extends DaoImpl<ReportDto, OrderTable> implements Dao<Rep
                 " WHERE " + OrderTable.USER_ID + " = '" + userId + "'" +
                 " AND " + OrderTable.IS_PAID + " = 0";
     }
+
+    private String getSqlQueryGettingReportByParameter(OrderTable parameter, OrderTable nextParameter) {
+        return "SELECT * FROM " + OrderTable.TABLE_NAME.get() +
+                " WHERE " + parameter + " = '1' AND " + nextParameter + " = '0'";
+    }
+
 
     private String getSqlQueryGettingReportByParameter(OrderTable parameter, int value) {
         return "SELECT * FROM " + OrderTable.TABLE_NAME.get() +
