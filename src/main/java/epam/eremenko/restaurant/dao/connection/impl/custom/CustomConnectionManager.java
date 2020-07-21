@@ -5,6 +5,7 @@ import epam.eremenko.restaurant.dao.exception.ConnectionPoolException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -41,11 +42,29 @@ public class CustomConnectionManager {
         return instance;
     }
 
-    void init() throws SQLException {
-        permissibleLoadPerConnection = connectThresholdPerConnection * initialPoolSize;
-        existsPoolSize = initialPoolSize;
-        pool = new ArrayBlockingQueue<>(maxPoolSize);
+    void init(Properties properties) throws SQLException {
+        setProperties(properties);
+        calculatePermissionLoadPerConnection();
+        setExistsPoolSize(initialPoolSize);
+        setPool(new ArrayBlockingQueue<>(maxPoolSize));
         createConnections(initialPoolSize);
+    }
+
+    private void setProperties(Properties properties) {
+        this.url = properties.getProperty("url");
+        this.user = properties.getProperty("user");
+        this.password = properties.getProperty("password");
+        this.useUnicode = properties.getProperty("useUnicode");
+        this.characterEncoding = properties.getProperty("characterEncoding");
+        this.initialPoolSize = Integer.parseInt(properties.getProperty("initialPoolSize"));
+        this.minPoolSize = Integer.parseInt(properties.getProperty("minPoolSize"));
+        this.maxPoolSize = Integer.parseInt(properties.getProperty("maxPoolSize"));
+        this.connectThresholdPerConnection = Integer.parseInt(properties.getProperty("threshold"));
+        this.acquireIncrement = Integer.parseInt(properties.getProperty("acquireIncrement"));
+    }
+
+    private void calculatePermissionLoadPerConnection() {
+        permissibleLoadPerConnection = connectThresholdPerConnection * initialPoolSize;
     }
 
     void releaseConnection(CustomConnection connection) {
