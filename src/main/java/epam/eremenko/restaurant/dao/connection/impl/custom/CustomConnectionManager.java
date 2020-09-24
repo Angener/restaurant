@@ -143,8 +143,8 @@ public class CustomConnectionManager {
     }
 
     private void increaseActiveConnectionsCounterAndThreshold() {
-        permissibleLoadPerConnection += connectThresholdPerConnection;
-        existsPoolSize++;
+        permissibleLoadPerConnection += connectThresholdPerConnection * acquireIncrement;
+        existsPoolSize += acquireIncrement;
     }
 
     public String getUrl() {
